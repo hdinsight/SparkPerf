@@ -12,6 +12,16 @@ object DataGenerator {
 
     val sparkSession = SparkSession.builder().appName("Spark SQL basic example")
       .getOrCreate()
+
+    if (args.length > 4) {
+      sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.impl",
+        "org.apache.hadoop.fs.s3native.NativeS3FileSystem")
+      sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.awsAccessKeyId",
+        args(3))
+      sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.awsSecretAccessKey",
+        args(4))
+    }
+
     import com.databricks.spark.sql.perf.tpcds.Tables
     // Tables in TPC-DS benchmark used by experiments.
     // dsdgenDir is the location of dsdgen tool installed in your machines.
