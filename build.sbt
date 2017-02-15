@@ -14,7 +14,7 @@ crossScalaVersions := Seq("2.10.6", "2.11.8")
 // All Spark Packages need a license
 licenses := Seq("Apache-2.0" -> url("http://opensource.org/licenses/Apache-2.0"))
 
-sparkVersion := "2.0.2"
+// sparkVersion := "2.0.2"
 // sparkComponents ++= Seq("sql", "hive", "mllib")
 
 
