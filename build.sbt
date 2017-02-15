@@ -45,6 +45,7 @@ libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "
 
 libraryDependencies += "org.scala-lang" % "scala-library" % "2.11.8"
 
+libraryDependencies += "org.apache.spark" % "spark-core_2.11" % "2.0.2"
 
 fork := true
 
