@@ -49,6 +49,8 @@ libraryDependencies += "org.apache.spark" % "spark-sql_2.11" % "2.0.2"
 
 libraryDependencies += "org.apache.spark" % "spark-mllib_2.11" % "2.0.2"
 
+libraryDependencies += "org.apache.spark" % "spark-hive_2.11" % "2.0.2"
+
 fork := true
 
 // Your username to login to Databricks Cloud
@@ -155,3 +157,28 @@ releaseProcess := Seq[ReleaseStep](
   commitNextVersion,
   pushChanges
 )
+
+mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) => {
+  case x if Assembly.isConfigFile(x) =>
+    MergeStrategy.concat
+  case PathList(ps@_*) if Assembly.isReadme(ps.last) || Assembly.isLicenseFile(ps.last) =>
+    MergeStrategy.rename
+  case PathList("META-INF", xs@_*) =>
+    (xs map {
+      _.toLowerCase
+    }) match {
+      case ("manifest.mf" :: Nil) | ("index.list" :: Nil) | ("dependencies" :: Nil) =>
+        MergeStrategy.discard
+      case ps@(x :: xs) if ps.last.endsWith(".sf") || ps.last.endsWith(".dsa") =>
+        MergeStrategy.discard
+      case "plexus" :: xs =>
+        MergeStrategy.discard
+      case "services" :: xs =>
+        MergeStrategy.filterDistinctLines
+      case ("spring.schemas" :: Nil) | ("spring.handlers" :: Nil) =>
+        MergeStrategy.filterDistinctLines
+      case _ => MergeStrategy.first
+    }
+  case _ => MergeStrategy.first
+}
+}
