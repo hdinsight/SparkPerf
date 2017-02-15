@@ -51,6 +51,8 @@ libraryDependencies += "org.apache.spark" % "spark-mllib_2.11" % "2.0.2"
 
 libraryDependencies += "org.apache.spark" % "spark-hive_2.11" % "2.0.2"
 
+libraryDependencies += "net.java.dev.jets3t" % "jets3t" % "0.9.4"
+
 fork := true
 
 // Your username to login to Databricks Cloud
