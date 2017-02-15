@@ -4,7 +4,7 @@ resolvers += "Spark Packages repo" at "https://dl.bintray.com/spark-packages/mav
 
 resolvers += "sonatype-releases" at "https://oss.sonatype.org/content/repositories/releases/"
 
-addSbtPlugin("org.spark-packages" %% "sbt-spark-package" % "0.1.1")
+// addSbtPlugin("org.spark-packages" %% "sbt-spark-package" % "0.1.1")
 
 addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.6.0")
 
