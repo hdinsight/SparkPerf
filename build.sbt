@@ -43,6 +43,9 @@ libraryDependencies += "org.yaml" % "snakeyaml" % "1.17"
 
 libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2"
 
+libraryDependencies += "org.scala-lang" % "scala-library" % "2.11.8"
+
+
 fork := true
 
 // Your username to login to Databricks Cloud
