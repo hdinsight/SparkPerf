@@ -1,3 +1,21 @@
+# Modified Version Tutorial - CodingCat
+
+0.	Install necessary tools
+Sudo apt-get install bison flex build-essential
+1.	git clone https://github.com/CodingCat/spark-sql-perf.git
+2.	Run the following command:
+cd spark-sql-perf; sbt assembly
+3.	Git clone https://github.com/davies/tpcds-kit
+4.	Run the following command:
+cd tpcds-kit/tools; mv Makefile.suite Makefile; make; cd -
+5.	Run the following command:
+cd spark-sql-perf; 
+spark-submit --class com.databricks.spark.sql.perf.runner.DataGenerator --executor-memory 4g target/scala-2.11/spark-sql-perf-assembly-0.4.11-SNAPSHOT.jar ~/tpcds-kit/tools size_of_data_in_GB location_of_generated_data blank_or_access_key blank_or_secret_key
+
+
+to use multiple machines to generate data, you have to do 3, 4 in every machine
+
+
 # Spark SQL Performance Tests
 
 [![Build Status](https://travis-ci.org/databricks/spark-sql-perf.svg)](https://travis-ci.org/databricks/spark-sql-perf)

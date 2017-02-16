@@ -126,7 +126,6 @@ class Tables(sqlContext: SQLContext, dsdgenDir: String, scaleFactor: Int) extend
       val mode = if (overwrite) SaveMode.Overwrite else SaveMode.Ignore
 
       val data = df(format != "text", numPartitions)
-      data.show()
       val tempTableName = s"${name}_text"
       data.registerTempTable(tempTableName)
 
