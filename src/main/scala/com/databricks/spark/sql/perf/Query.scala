@@ -24,6 +24,8 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.catalyst.analysis.UnresolvedRelation
 import org.apache.spark.sql.execution.SparkPlan
 
+import org.apache.hadoop.hive.metastore.parser.ExpressionTree.TreeNode
+
 
 /** Holds one benchmark query and its metadata. */
 class Query(
@@ -85,7 +87,8 @@ class Query(
 
       val breakdownResults = if (includeBreakdown) {
         val depth = queryExecution.executedPlan.collect { case p: SparkPlan => p }.size
-        val physicalOperators = (0 until depth).map(i => (i, queryExecution.executedPlan(i)))
+        val physicalOperators = (0 until depth).map(i => (i, queryExecution.executedPlan(i).
+          asInstanceOf[SparkPlan]))
         val indexMap = physicalOperators.map { case (index, op) => (op, index) }.toMap
         val timeMap = new mutable.HashMap[Int, Double]
 
@@ -94,12 +97,12 @@ class Query(
             messages += s"Breakdown: ${node.simpleString}"
             val newNode = buildDataFrame.queryExecution.executedPlan(index)
             val executionTime = measureTimeMs {
-              newNode.execute().foreach((row: Any) => Unit)
+              newNode.asInstanceOf[SparkPlan].execute().foreach((row: Any) => Unit)
             }
             timeMap += ((index, executionTime))
 
-            val childIndexes = node.children.map(indexMap)
-            val childTime = childIndexes.map(timeMap).sum
+            val childIndexes = node.children.map(c => indexMap(c.asInstanceOf[SparkPlan]))
+            val childTime = childIndexes.map(cId => timeMap(cId)).sum
 
             messages += s"Breakdown time: $executionTime (+${executionTime - childTime})"
 
