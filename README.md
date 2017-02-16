@@ -1,7 +1,16 @@
 # Modified Version Tutorial - CodingCat
 
 0.	Install necessary tools
-Sudo apt-get install bison flex build-essential
+sudo apt-get install bison flex build-essential
+
+echo "deb https://dl.bintray.com/sbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
+
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2EE0EA64E40A89B84B2DF73499E82A75642AC823
+
+sudo apt-get update
+
+sudo apt-get install sbt
+
 1.	git clone https://github.com/CodingCat/spark-sql-perf.git
 2.	Run the following command:
 cd spark-sql-perf; sbt assembly
@@ -13,7 +22,9 @@ cd spark-sql-perf;
 spark-submit --class com.databricks.spark.sql.perf.runner.DataGenerator --executor-memory 4g target/scala-2.11/spark-sql-perf-assembly-0.4.11-SNAPSHOT.jar ~/tpcds-kit/tools size_of_data_in_GB location_of_generated_data blank_or_access_key blank_or_secret_key
 
 
-to use multiple machines to generate data, you have to do 3, 4 in every machine
+## NOTE
+1. if you are not using S3 to store generated data, you do not need the last two parameters in step 6
+2. to use multiple machines to generate data, you have to do 3, 4 in every machine
 
 
 # Spark SQL Performance Tests
