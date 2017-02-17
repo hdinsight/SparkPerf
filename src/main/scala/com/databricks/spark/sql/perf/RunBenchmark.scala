@@ -29,7 +29,9 @@ case class RunConfig(
     databasePath: String = null,
     filter: Option[String] = None,
     iterations: Int = 3,
-    baseline: Option[Long] = None)
+    baseline: Option[Long] = None,
+    s3AccessKey: String = null,
+    s3SecretKey: String = null)
 
 /**
  * Runs a benchmark locally and prints the results to the screen.
@@ -59,6 +61,12 @@ object RunBenchmark {
       opt[Long]('c', "compare")
           .action((x, c) => c.copy(baseline = Some(x)))
           .text("the timestamp of the baseline experiment to compare with")
+      opt[String]("s3AccessKey")
+        .action((x, c) => c.copy(s3AccessKey = x))
+        .text("s3 access key")
+      opt[String]("s3SecreteKey")
+        .action((x, c) => c.copy(s3SecretKey = x))
+        .text("s3 secrete key")
       help("help")
         .text("prints this usage text")
     }
@@ -84,6 +92,15 @@ object RunBenchmark {
       .enableHiveSupport()
       .getOrCreate()
     import sparkSession.implicits._
+
+    if (config.s3AccessKey != null) {
+      sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.impl",
+        "org.apache.hadoop.fs.s3native.NativeS3FileSystem")
+      sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.awsAccessKeyId",
+        config.s3AccessKey)
+      sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.awsSecretAccessKey",
+        config.s3SecretKey)
+    }
 
     sparkSession.sql(s"USE ${config.databaseName}")
 

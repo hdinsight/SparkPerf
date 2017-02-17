@@ -113,6 +113,8 @@ class TPCDS(@transient sqlContext: SQLContext) extends Benchmark(sqlContext)
     println(s"Ran ${succeeded.size} out of ${queries.size}")
     println(succeeded.map("\"" + _ + "\""))
   }
+
+  override lazy val allQueries: Seq[Query] = q7Derived.values.toSeq
 }
 
 
