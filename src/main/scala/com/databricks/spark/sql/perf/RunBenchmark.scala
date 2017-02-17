@@ -18,14 +18,15 @@ package com.databricks.spark.sql.perf
 
 import java.net.InetAddress
 
-import org.apache.spark.sql.SQLContext
+import org.apache.spark.sql.{SQLContext, SparkSession}
 import org.apache.spark.sql.functions._
-import org.apache.spark.{SparkContext, SparkConf}
-
+import org.apache.spark.{SparkConf, SparkContext}
 import scala.util.Try
 
 case class RunConfig(
     benchmarkName: String = null,
+    databaseName: String = null,
+    databasePath: String = null,
     filter: Option[String] = None,
     iterations: Int = 3,
     baseline: Option[Long] = None)
@@ -40,6 +41,14 @@ object RunBenchmark {
       opt[String]('b', "benchmark")
         .action { (x, c) => c.copy(benchmarkName = x) }
         .text("the name of the benchmark to run")
+        .required()
+      opt[String]('d', "database")
+        .action { (x, c) => c.copy(databaseName = x) }
+        .text("the name of database")
+        .required()
+      opt[String]('p', "path")
+        .action { (x, c) => c.copy(databasePath = x) }
+        .text("the path of database path")
         .required()
       opt[String]('f', "filter")
         .action((x, c) => c.copy(filter = Some(x)))
@@ -68,10 +77,17 @@ object RunBenchmark {
         .setAppName(getClass.getName)
 
     val sc = SparkContext.getOrCreate(conf)
-    val sqlContext = SQLContext.getOrCreate(sc)
-    import sqlContext.implicits._
+    val sparkSession = SparkSession
+      .builder()
+      .appName("Spark SQL basic example")
+      .config("spark.sql.warehouse.dir", config.databasePath)
+      .enableHiveSupport()
+      .getOrCreate()
+    import sparkSession.implicits._
 
-    sqlContext.setConf("spark.sql.perf.results", new java.io.File("performance").toURI.toString)
+    sparkSession.sql(s"USE ${config.databaseName}")
+
+    sparkSession.sqlContext.setConf("spark.sql.perf.results", new java.io.File("performance").toURI.toString)
     val benchmark = Try {
       Class.forName(config.benchmarkName)
           .newInstance()
@@ -101,7 +117,7 @@ object RunBenchmark {
     println("== STARTING EXPERIMENT ==")
     experiment.waitForFinish(1000 * 60 * 30)
 
-    sqlContext.setConf("spark.sql.shuffle.partitions", "1")
+    sparkSession.sqlContext.setConf("spark.sql.shuffle.partitions", "1")
     experiment.getCurrentRuns()
         .withColumn("result", explode($"results"))
         .select("result.*")
@@ -119,7 +135,7 @@ object RunBenchmark {
       val baselineTime = when($"timestamp" === baseTimestamp, $"executionTime").otherwise(null)
       val thisRunTime = when($"timestamp" === experiment.timestamp, $"executionTime").otherwise(null)
 
-      val data = sqlContext.read.json(benchmark.resultsLocation)
+      val data = sparkSession.read.json(benchmark.resultsLocation)
           .coalesce(1)
           .where(s"timestamp IN ($baseTimestamp, ${experiment.timestamp})")
           .withColumn("result", explode($"results"))

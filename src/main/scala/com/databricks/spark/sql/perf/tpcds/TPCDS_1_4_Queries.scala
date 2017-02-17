@@ -3875,5 +3875,5 @@ trait Tpcds_1_4_Queries extends Benchmark {
     "q80", "q82", "q84", "q85", "q86", "q87", "q88", "q89",
     "q90", "q91", "q93", "q96", "q97", "q98", "q99", "qSsMax").map(tpcds1_4QueriesMap)
 
-  val all: Seq[Query] = tpcds1_4QueriesMap.values.toSeq
+  override lazy val allQueries: Seq[Query] = tpcds1_4QueriesMap.values.toSeq
 }

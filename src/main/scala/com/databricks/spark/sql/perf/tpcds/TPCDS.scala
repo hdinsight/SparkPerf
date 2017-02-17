@@ -27,8 +27,7 @@ import org.apache.spark.sql.SQLContext
  *
  * @param sqlContext An existing SQLContext.
  */
-class TPCDS(@transient sqlContext: SQLContext)
-  extends Benchmark(sqlContext)
+class TPCDS(@transient sqlContext: SQLContext) extends Benchmark(sqlContext)
   with ImpalaKitQueries
   with SimpleQueries
   with Tpcds_1_4_Queries

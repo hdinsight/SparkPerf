@@ -12,7 +12,11 @@ object DataGenerator {
     val scaleFactor = args(1).toInt
     val tableLocation = args(2)
 
-    val sparkSession = SparkSession.builder().appName("Spark SQL basic example")
+    val sparkSession = SparkSession
+      .builder()
+      .appName("Spark SQL basic example")
+      .config("spark.sql.warehouse.dir", tableLocation)
+      .enableHiveSupport()
       .getOrCreate()
 
     if (args.length > 4) {
@@ -36,10 +40,5 @@ object DataGenerator {
     // Create metastore tables in a specified database for your data.
     // Once tables are created, the current database will be switched to the specified database.
     tables.createExternalTables(tableLocation, "parquet", "db1", overwrite = true)
-
-    // Setup TPC-DS experiment
-    import com.databricks.spark.sql.perf.tpcds.TPCDS
-    val tpcds = new TPCDS (sqlContext = sparkSession.sqlContext)
-
   }
 }
