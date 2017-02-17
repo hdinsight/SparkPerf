@@ -114,7 +114,7 @@ class TPCDS(@transient sqlContext: SQLContext) extends Benchmark(sqlContext)
     println(succeeded.map("\"" + _ + "\""))
   }
 
-  override lazy val allQueries: Seq[Query] = q7Derived.values.toSeq
+  override lazy val allQueries: Seq[Query] = q7Derived
 }
 
 
