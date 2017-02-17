@@ -2,6 +2,8 @@ package com.databricks.spark.sql.perf.runner
 
 import org.apache.spark.sql.SparkSession
 
+import com.databricks.spark.sql.perf.tpcds.Tables
+
 
 object DataGenerator {
 
@@ -21,15 +23,15 @@ object DataGenerator {
       sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.awsSecretAccessKey",
         args(4))
     }
-
+    val genData = args(5).toBoolean
     import com.databricks.spark.sql.perf.tpcds.Tables
-    // Tables in TPC-DS benchmark used by experiments.
-    // dsdgenDir is the location of dsdgen tool installed in your machines.
     val tables = new Tables(sparkSession.sqlContext, dsdgenPath, scaleFactor)
-    // Generate data.
-    tables.genData(tableLocation, "parquet",
-      overwrite = true, partitionTables = true, useDoubleForDecimal = false,
-      clusterByPartitionColumns = true, filterOutNullPartitionValues = true)
+
+    if (genData) {
+      tables.genData(tableLocation, "parquet",
+        overwrite = true, partitionTables = true, useDoubleForDecimal = false,
+        clusterByPartitionColumns = true, filterOutNullPartitionValues = true)
+    }
 
     // Create metastore tables in a specified database for your data.
     // Once tables are created, the current database will be switched to the specified database.

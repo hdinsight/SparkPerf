@@ -215,20 +215,25 @@ class Tables(sqlContext: SQLContext, dsdgenDir: String, scaleFactor: Int) extend
       }
     }
 
-    val withSpecifiedDataType = if (useDoubleForDecimal) {
+    val tablesWithSpecifiedDataType = if (useDoubleForDecimal) {
       tablesToBeGenerated.map(_.useDoubleForDecimal())
     } else {
       tablesToBeGenerated
     }
 
-    withSpecifiedDataType.foreach { table =>
+    tablesWithSpecifiedDataType.foreach { table =>
       val tableLocation = s"$location/${table.name}"
       table.genData(tableLocation, format, overwrite, clusterByPartitionColumns,
         filterOutNullPartitionValues, numPartitions)
     }
   }
 
-  def createExternalTables(location: String, format: String, databaseName: String, overwrite: Boolean, tableFilter: String = ""): Unit = {
+  def createExternalTables(
+      location: String,
+      format: String,
+      databaseName: String,
+      overwrite: Boolean,
+      tableFilter: String = ""): Unit = {
     val filtered = if (tableFilter.isEmpty) {
       tables
     } else {
