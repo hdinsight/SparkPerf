@@ -16,7 +16,8 @@
 
 package com.databricks.spark.sql.perf.bigdata
 
-import com.databricks.spark.sql.perf.{ExecutionMode, Benchmark}
+import com.databricks.spark.sql.perf.benchmarks.Benchmark
+import com.databricks.spark.sql.perf.report.ExecutionMode
 
 trait Queries extends Benchmark {
 

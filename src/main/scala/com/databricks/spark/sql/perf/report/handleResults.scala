@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.databricks.spark.sql.perf
+package com.databricks.spark.sql.perf.report
 
 import org.apache.spark.sql.SQLContext
 

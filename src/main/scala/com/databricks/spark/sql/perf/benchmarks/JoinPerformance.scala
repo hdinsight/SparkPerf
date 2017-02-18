@@ -1,4 +1,6 @@
-package com.databricks.spark.sql.perf
+package com.databricks.spark.sql.perf.benchmarks
+
+import com.databricks.spark.sql.perf.Query
 
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
@@ -6,7 +8,7 @@ import org.apache.spark.sql.types._
 trait JoinPerformance extends Benchmark {
   // 1.5 mb, 1 file
 
-  import ExecutionMode._
+  import com.databricks.spark.sql.perf.report.ExecutionMode._
   import sqlContext.implicits._
 
   private val table = sqlContext.table _

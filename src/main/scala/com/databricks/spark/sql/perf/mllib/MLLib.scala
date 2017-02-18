@@ -3,7 +3,7 @@ package com.databricks.spark.sql.perf.mllib
 import scala.language.implicitConversions
 
 import com.databricks.spark.sql.perf._
-
+import com.databricks.spark.sql.perf.benchmarks.Benchmark
 import com.typesafe.scalalogging.slf4j.{LazyLogging => Logging}
 
 import org.apache.spark.SparkContext

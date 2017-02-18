@@ -66,7 +66,7 @@ the TPCDS data requires dsdgen built and available on the machines. We have a fo
 you will need. It can be found [here](https://github.com/davies/tpcds-kit).  
 
 ```
-import com.databricks.spark.sql.perf.tpcds.Tables
+import com.databricks.spark.sql.perf.benchmarks.tpcds.Tables
 // Tables in TPC-DS benchmark used by experiments.
 // dsdgenDir is the location of dsdgen tool installed in your machines.
 val tables = new Tables(sqlContext, dsdgenDir, scaleFactor)
@@ -78,7 +78,7 @@ tables.createExternalTables(location, format, databaseName, overwrite)
 // Or, if you want to create temporary tables
 tables.createTemporaryTables(location, format)
 // Setup TPC-DS experiment
-import com.databricks.spark.sql.perf.tpcds.TPCDS
+import com.databricks.spark.sql.perf.benchmarks.tpcds.TPCDS
 val tpcds = new TPCDS (sqlContext = sqlContext)
 ```
 

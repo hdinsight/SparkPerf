@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package com.databricks.spark.sql.perf
+package com.databricks.spark.sql.perf.benchmarks
 
-import org.apache.spark.sql.{Encoder, SQLContext}
+import com.databricks.spark.sql.perf.Query
+import com.databricks.spark.sql.perf.report.ExecutionMode
+
+import org.apache.spark.sql.Encoder
 import org.apache.spark.sql.expressions.Aggregator
 
 case class Data(id: Long)

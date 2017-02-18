@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.databricks.spark.sql.perf
+package com.databricks.spark.sql.perf.benchmarks
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -23,12 +23,14 @@ import scala.concurrent.duration._
 import scala.language.implicitConversions
 import scala.util.{Success, Try, Failure => SFailure}
 
-import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{Dataset, DataFrame, SQLContext}
-import org.apache.spark.sql.catalyst.analysis.UnresolvedRelation
-import org.apache.spark.SparkContext
-
+import com.databricks.spark.sql.perf._
 import com.databricks.spark.sql.perf.cpu._
+import com.databricks.spark.sql.perf.report._
+
+import org.apache.spark.SparkContext
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.catalyst.analysis.UnresolvedRelation
+import org.apache.spark.sql.{DataFrame, Dataset, SQLContext}
 
 /**
  * A collection of queries that test a particular aspect of Spark SQL.
@@ -112,7 +114,6 @@ abstract class Benchmark(
   }
 
 
-  import reflect.runtime._, universe._
   import reflect.runtime._
   import universe._
 

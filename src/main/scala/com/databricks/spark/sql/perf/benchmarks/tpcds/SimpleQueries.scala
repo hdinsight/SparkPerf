@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.databricks.spark.sql.perf.tpcds
+package com.databricks.spark.sql.perf.benchmarks.tpcds
 
-import com.databricks.spark.sql.perf.{ExecutionMode, Benchmark}
+import com.databricks.spark.sql.perf.benchmarks.Benchmark
+import com.databricks.spark.sql.perf.report.ExecutionMode
 
 trait SimpleQueries extends Benchmark {
 

@@ -6,6 +6,9 @@ import com.typesafe.scalalogging.slf4j.{LazyLogging => Logging}
 import org.apache.spark.sql._
 import scala.collection.mutable.ArrayBuffer
 
+import com.databricks.spark.sql.perf.benchmarks.Benchmarkable
+import com.databricks.spark.sql.perf.report._
+
 import org.apache.spark.ml.Transformer
 
 class MLTransformerBenchmarkable(

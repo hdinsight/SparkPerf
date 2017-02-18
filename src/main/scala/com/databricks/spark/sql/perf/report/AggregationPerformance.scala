@@ -1,11 +1,12 @@
-package com.databricks.spark.sql.perf
+package com.databricks.spark.sql.perf.report
 
-import org.apache.spark.sql.{Row, SQLContext}
+import com.databricks.spark.sql.perf._
+import com.databricks.spark.sql.perf.benchmarks.{Benchmark, Table, Variation}
 
 trait AggregationPerformance extends Benchmark {
 
-  import sqlContext.implicits._
   import ExecutionMode._
+  import sqlContext.implicits._
 
 
   val sizes = (1 to 6).map(math.pow(10, _).toInt).toSeq

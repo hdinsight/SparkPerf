@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.databricks.spark.sql.perf.tpcds
+package com.databricks.spark.sql.perf.benchmarks.tpcds
 
-import com.databricks.spark.sql.perf.{Benchmark, ExecutionMode, Query}
+import com.databricks.spark.sql.perf.benchmarks.Benchmark
+import com.databricks.spark.sql.perf.Query
 
 /**
  * This implements the official TPCDS v1.4 queries with only cosmetic modifications
@@ -25,7 +26,7 @@ import com.databricks.spark.sql.perf.{Benchmark, ExecutionMode, Query}
  */
 trait Tpcds_1_4_Queries extends Benchmark {
 
-  import ExecutionMode._
+  import com.databricks.spark.sql.perf.report.ExecutionMode._
 
   // should be random generated based on scale
   // RC=ulist(random(1, rowcount("store_sales")/5,uniform),5);

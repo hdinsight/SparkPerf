@@ -1,8 +1,6 @@
-package com.databricks.spark.sql.perf.runner
+package com.databricks.spark.sql.perf
 
 import org.apache.spark.sql.SparkSession
-
-import com.databricks.spark.sql.perf.tpcds.Tables
 
 
 object DataGenerator {
@@ -28,7 +26,7 @@ object DataGenerator {
         args(4))
     }
     val genData = args(5).toBoolean
-    import com.databricks.spark.sql.perf.tpcds.Tables
+    import com.databricks.spark.sql.perf.benchmarks.tpcds.Tables
     val tables = new Tables(sparkSession.sqlContext, dsdgenPath, scaleFactor)
 
     if (genData) {

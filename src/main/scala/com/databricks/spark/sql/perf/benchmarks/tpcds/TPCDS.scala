@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.databricks.spark.sql.perf.tpcds
+package com.databricks.spark.sql.perf.benchmarks.tpcds
 
 import scala.collection.mutable
 
 import com.databricks.spark.sql.perf._
+import com.databricks.spark.sql.perf.benchmarks.Benchmark
+
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SQLContext
 
