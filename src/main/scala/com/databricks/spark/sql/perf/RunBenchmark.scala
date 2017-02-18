@@ -82,11 +82,6 @@ object RunBenchmark {
   }
 
   def run(config: RunConfig): Unit = {
-    val conf = new SparkConf()
-        .setMaster("local[*]")
-        .setAppName(getClass.getName)
-
-    val sc = SparkContext.getOrCreate(conf)
     val sparkSession = SparkSession
       .builder()
       .appName("Spark SQL basic example")
@@ -106,7 +101,8 @@ object RunBenchmark {
 
     sparkSession.sql(s"USE ${config.databaseName}")
 
-    sparkSession.sqlContext.setConf("spark.sql.perf.results", new java.io.File("performance").toURI.toString)
+    sparkSession.sqlContext.setConf("spark.sql.perf.results",
+      new java.io.File("performance").toURI.toString)
     val benchmark = Try {
       Class.forName(config.benchmarkName)
           .newInstance()
