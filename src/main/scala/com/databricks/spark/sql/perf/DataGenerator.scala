@@ -25,7 +25,13 @@ object DataGenerator {
       sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.awsSecretAccessKey",
         args(4))
     }
-    val genData = args(5).toBoolean
+    val genData = {
+      if (args.length > 4) {
+        args(5).toBoolean
+      } else {
+        args(3).toBoolean
+      }
+    }
     import com.databricks.spark.sql.perf.benchmarks.tpcds.Tables
     val tables = new Tables(sparkSession.sqlContext, dsdgenPath, scaleFactor)
 
