@@ -1,7 +1,7 @@
 package com.databricks.spark.sql.perf.report
 
 import com.databricks.spark.sql.perf._
-import com.databricks.spark.sql.perf.benchmarks.{Benchmark, Table, Variation}
+import com.databricks.spark.sql.perf.queries.{Benchmark, Query, Table, Variation}
 
 trait AggregationPerformance extends Benchmark {
 

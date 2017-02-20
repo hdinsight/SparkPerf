@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.databricks.spark.sql.perf.benchmarks
+package com.databricks.spark.sql.perf
 
 import java.util.UUID
 

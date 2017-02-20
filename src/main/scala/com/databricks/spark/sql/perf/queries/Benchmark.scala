@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.databricks.spark.sql.perf.benchmarks
+package com.databricks.spark.sql.perf.queries
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -23,7 +23,7 @@ import scala.concurrent.duration._
 import scala.language.implicitConversions
 import scala.util.{Success, Try, Failure => SFailure}
 
-import com.databricks.spark.sql.perf._
+import com.databricks.spark.sql.perf.{Benchmarkable, cpu}
 import com.databricks.spark.sql.perf.cpu._
 import com.databricks.spark.sql.perf.report._
 

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.databricks.spark.sql.perf.benchmarks.tpcds
+package com.databricks.spark.sql.perf.queries.tpcds
 
-import com.databricks.spark.sql.perf.benchmarks.{Benchmark, Benchmarkable}
+import com.databricks.spark.sql.perf.queries.Benchmark
 import com.databricks.spark.sql.perf.report.ExecutionMode
 
 class ImpalaKitQueries extends Benchmark {

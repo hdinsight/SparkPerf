@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.databricks.spark.sql.perf.benchmarks.tpcds
+package com.databricks.spark.sql.perf.queries.tpcds
 
-import com.databricks.spark.sql.perf.benchmarks.Benchmark
-import com.databricks.spark.sql.perf.Query
+import com.databricks.spark.sql.perf.queries.{Benchmark, Query}
 
 /**
  * This implements the official TPCDS v1.4 queries with only cosmetic modifications

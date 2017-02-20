@@ -32,7 +32,7 @@ object DataGenerator {
         args(3).toBoolean
       }
     }
-    import com.databricks.spark.sql.perf.benchmarks.tpcds.Tables
+    import com.databricks.spark.sql.perf.queries.tpcds.Tables
     val tables = new Tables(sparkSession.sqlContext, dsdgenPath, scaleFactor)
 
     if (genData) {

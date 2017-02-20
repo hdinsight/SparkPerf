@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.databricks.spark.sql.perf.benchmarks.tpcds
+package com.databricks.spark.sql.perf.queries.tpcds
 
 import scala.collection.mutable
 
 import com.databricks.spark.sql.perf._
-import com.databricks.spark.sql.perf.benchmarks.Benchmark
+import com.databricks.spark.sql.perf.queries.{Benchmark, Query}
 
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SQLContext
@@ -30,7 +30,6 @@ import org.apache.spark.sql.SQLContext
  * @param sqlContext An existing SQLContext.
  */
 class TPCDS(@transient sqlContext: SQLContext) extends Benchmark(sqlContext)
-  with SimpleQueries
   with Tpcds_1_4_Queries
   with Serializable {
 
@@ -115,7 +114,7 @@ class TPCDS(@transient sqlContext: SQLContext) extends Benchmark(sqlContext)
     println(succeeded.map("\"" + _ + "\""))
   }
 
-  override lazy val allQueries: Seq[Query] = q7Derived
+  override lazy val allQueries: Seq[Query] = runnable
 }
 
 

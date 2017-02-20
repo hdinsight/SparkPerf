@@ -23,7 +23,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.{SparkConf, SparkContext}
 import scala.util.Try
 
-import com.databricks.spark.sql.perf.benchmarks.Benchmark
+import com.databricks.spark.sql.perf.queries.Benchmark
 
 case class RunConfig(
     benchmarkName: String = null,

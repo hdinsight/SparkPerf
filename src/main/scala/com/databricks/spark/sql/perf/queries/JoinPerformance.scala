@@ -1,6 +1,4 @@
-package com.databricks.spark.sql.perf.benchmarks
-
-import com.databricks.spark.sql.perf.Query
+package com.databricks.spark.sql.perf.queries
 
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._

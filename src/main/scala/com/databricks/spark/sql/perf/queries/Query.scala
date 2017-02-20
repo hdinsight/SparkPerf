@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package com.databricks.spark.sql.perf
+package com.databricks.spark.sql.perf.queries
 
-import scala.language.implicitConversions
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
+import scala.language.implicitConversions
 
-import com.databricks.spark.sql.perf.benchmarks.Benchmarkable
+import com.databricks.spark.sql.perf.Benchmarkable
 import com.databricks.spark.sql.perf.report.{BenchmarkResult, BreakdownResult, ExecutionMode, Failure}
 
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.catalyst.analysis.UnresolvedRelation
 import org.apache.spark.sql.execution.SparkPlan
-import org.apache.hadoop.hive.metastore.parser.ExpressionTree.TreeNode
 
 
 /** Holds one benchmark query and its metadata. */
