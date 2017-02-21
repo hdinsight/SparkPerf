@@ -24,6 +24,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 import scala.util.Try
 
 import com.databricks.spark.sql.perf.queries.Benchmark
+import com.databricks.spark.sql.perf.report.ExecutionMode
 
 case class RunConfig(
     benchmarkName: String = null,
@@ -32,6 +33,8 @@ case class RunConfig(
     filter: Option[String] = None,
     iterations: Int = 3,
     baseline: Option[Long] = None,
+    executionMode: String = "foreach",
+    outputDir: String = "",
     s3AccessKey: String = null,
     s3SecretKey: String = null)
 
@@ -66,6 +69,12 @@ object RunBenchmark {
       opt[String]("s3AccessKey")
         .action((x, c) => c.copy(s3AccessKey = x))
         .text("s3 access key")
+      opt[String]("executionMode")
+        .action((x, c) => c.copy(executionMode = x))
+        .text("execution mode of queries")
+      opt[String]("outputDir")
+        .action((x, c) => c.copy(outputDir = x))
+        .text("output directory")
       opt[String]("s3SecreteKey")
         .action((x, c) => c.copy(s3SecretKey = x))
         .text("s3 secrete key")
@@ -103,15 +112,12 @@ object RunBenchmark {
 
     sparkSession.sqlContext.setConf("spark.sql.perf.results",
       new java.io.File("performance").toURI.toString)
-    val benchmark = Try {
-      Class.forName(config.benchmarkName)
-          .newInstance()
-          .asInstanceOf[Benchmark]
-    } getOrElse {
-      Class.forName("com.databricks.spark.sql.perf." + config.benchmarkName)
-          .newInstance()
-          .asInstanceOf[Benchmark]
-    }
+    val benchmark = Class.forName(config.benchmarkName).getConstructor(classOf[ExecutionMode]).
+      newInstance({config.executionMode match {
+        case "foreach" => ExecutionMode.ForeachResults
+        case "collect" => ExecutionMode.CollectResults
+        case "parquet" => ExecutionMode.WriteParquet(config.outputDir)
+      }}).asInstanceOf[Benchmark]
 
     val allQueries = config.filter.map { f =>
       benchmark.allQueries.filter(_.name contains f)

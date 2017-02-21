@@ -19,7 +19,7 @@ package com.databricks.spark.sql.perf.queries.tpcds
 import com.databricks.spark.sql.perf.queries.Benchmark
 import com.databricks.spark.sql.perf.report.ExecutionMode
 
-class ImpalaKitQueries extends Benchmark {
+class ImpalaKitQueries(executionMode: ExecutionMode = ExecutionMode.ForeachResults) extends Benchmark {
 
   import ExecutionMode._
 
@@ -1492,7 +1492,7 @@ class ImpalaKitQueries extends Benchmark {
         |from store_sales
       """.stripMargin)
   ).map { case (name, sqlText) =>
-    Query(name, sqlText, description = "original query", executionMode = CollectResults)
+    Query(name, sqlText, description = "original query", executionMode = executionMode)
   }
 
   private val interactiveQueries =

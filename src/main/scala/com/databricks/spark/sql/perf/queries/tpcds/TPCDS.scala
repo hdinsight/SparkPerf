@@ -20,6 +20,7 @@ import scala.collection.mutable
 
 import com.databricks.spark.sql.perf._
 import com.databricks.spark.sql.perf.queries.{Benchmark, Query}
+import com.databricks.spark.sql.perf.report.ExecutionMode
 
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SQLContext
@@ -29,11 +30,14 @@ import org.apache.spark.sql.SQLContext
  *
  * @param sqlContext An existing SQLContext.
  */
-class TPCDS(@transient sqlContext: SQLContext) extends Benchmark(sqlContext)
-  with Tpcds_1_4_Queries
+class TPCDS(executionMode: ExecutionMode = ExecutionMode.ForeachResults,
+            @transient sqlContext: SQLContext) extends Benchmark(sqlContext)
   with Serializable {
 
-  def this() = this(SQLContext.getOrCreate(SparkContext.getOrCreate()))
+  val tpcdsQueries = new Tpcds_1_4_Queries(executionMode)
+
+  def this(executionMode: ExecutionMode) = this(executionMode,
+    SQLContext.getOrCreate(SparkContext.getOrCreate()))
 
   /*
   def setupBroadcast(skipTables: Seq[String] = Seq("store_sales", "customer")) = {
@@ -114,7 +118,7 @@ class TPCDS(@transient sqlContext: SQLContext) extends Benchmark(sqlContext)
     println(succeeded.map("\"" + _ + "\""))
   }
 
-  override lazy val allQueries: Seq[Query] = runnable
+  override lazy val allQueries: Seq[Query] = tpcdsQueries.runnable
 }
 
 

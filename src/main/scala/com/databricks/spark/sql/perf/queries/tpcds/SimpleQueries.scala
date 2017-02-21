@@ -20,7 +20,7 @@ import com.databricks.spark.sql.perf.Benchmarkable
 import com.databricks.spark.sql.perf.queries.Benchmark
 import com.databricks.spark.sql.perf.report.ExecutionMode
 
-class SimpleQueries extends Benchmark {
+class SimpleQueries(executionMode: ExecutionMode = ExecutionMode.ForeachResults) extends Benchmark {
 
   import ExecutionMode._
 
@@ -205,7 +205,7 @@ class SimpleQueries extends Benchmark {
                                    |  t1.ss_sold_date_sk between 2450815 and 2451179
                                    """.stripMargin)
    ).map { case (name, sqlText) =>
-     Query(name = name, sqlText = sqlText, description = "", executionMode = ForeachResults)
+     Query(name = name, sqlText = sqlText, description = "", executionMode = executionMode)
    }
 
   override lazy val allQueries: Seq[Benchmarkable] = q7Derived

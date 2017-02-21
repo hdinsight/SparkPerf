@@ -17,13 +17,15 @@
 package com.databricks.spark.sql.perf.queries.tpcds
 
 import com.databricks.spark.sql.perf.queries.{Benchmark, Query}
+import com.databricks.spark.sql.perf.report.ExecutionMode
 
 /**
  * This implements the official TPCDS v1.4 queries with only cosmetic modifications
  * (noted for each query).
  * Don't modify this except for these kind of modifications.
  */
-trait Tpcds_1_4_Queries extends Benchmark {
+class Tpcds_1_4_Queries(executionMode: ExecutionMode)
+  extends Benchmark {
 
   import com.databricks.spark.sql.perf.report.ExecutionMode._
 
@@ -3859,7 +3861,7 @@ trait Tpcds_1_4_Queries extends Benchmark {
           |from store_sales
         """.stripMargin)
   ).map { case (name, sqlText) =>
-    Query(name + "-v1.4", sqlText, description = "TPCDS 1.4 Query", executionMode = CollectResults)
+    Query(name + "-v1.4", sqlText, description = "TPCDS 1.4 Query", executionMode = executionMode)
   }
   val tpcds1_4QueriesMap = tpcds1_4Queries.map(q => q.name.split("-").get(0) -> q).toMap
 

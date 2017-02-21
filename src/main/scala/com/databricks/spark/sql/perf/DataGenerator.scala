@@ -17,6 +17,8 @@ object DataGenerator {
       .enableHiveSupport()
       .getOrCreate()
 
+    println("hello")
+
     if (args.length > 4) {
       sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.impl",
         "org.apache.hadoop.fs.s3native.NativeS3FileSystem")
