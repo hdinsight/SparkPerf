@@ -164,7 +164,7 @@ object RunBenchmark {
             "percentChange", ($"baselineTimeMs" - $"thisRunTimeMs") / $"baselineTimeMs" * 100)
           .filter('thisRunTimeMs.isNotNull)
 
-      data.show(truncate = false)
+      data.show(100, truncate = false)
     }
   }
 }
