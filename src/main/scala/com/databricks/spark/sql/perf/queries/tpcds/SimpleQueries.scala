@@ -205,7 +205,13 @@ class SimpleQueries(executionMode: ExecutionMode = ExecutionMode.ForeachResults)
                                    |  t1.ss_sold_date_sk between 2450815 and 2451179
                                    """.stripMargin)
    ).map { case (name, sqlText) =>
-     Query(name = name, sqlText = sqlText, description = "", executionMode = executionMode)
+     Query(name = name, sqlText = sqlText, description = "", executionMode = {
+       executionMode match {
+         case WriteParquet(location) =>
+           WriteParquet(location + s"/$name")
+         case exeMode => exeMode
+       }
+     })
    }
 
   override lazy val allQueries: Seq[Benchmarkable] = q7Derived

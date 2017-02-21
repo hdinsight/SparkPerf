@@ -1043,7 +1043,13 @@ class ImpalaKitQueries(executionMode: ExecutionMode = ExecutionMode.ForeachResul
                  |from store_sales
                """.stripMargin)
   ).map {
-    case (name, sqlText) => Query(name, sqlText, description = "", executionMode = CollectResults)
+    case (name, sqlText) => Query(name, sqlText, description = "", executionMode = {
+      executionMode match {
+        case WriteParquet(location) =>
+          WriteParquet(location + s"/$name")
+        case exeMode => exeMode
+      }
+    })
   }
   val queriesMap = queries.map(q => q.name -> q).toMap
 
@@ -1492,7 +1498,13 @@ class ImpalaKitQueries(executionMode: ExecutionMode = ExecutionMode.ForeachResul
         |from store_sales
       """.stripMargin)
   ).map { case (name, sqlText) =>
-    Query(name, sqlText, description = "original query", executionMode = executionMode)
+    Query(name, sqlText, description = "original query", executionMode = {
+      executionMode match {
+        case WriteParquet(location) =>
+          WriteParquet(location + s"/$name")
+        case exeMode => exeMode
+      }
+    })
   }
 
   private val interactiveQueries =

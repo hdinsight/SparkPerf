@@ -3861,7 +3861,13 @@ class Tpcds_1_4_Queries(executionMode: ExecutionMode)
           |from store_sales
         """.stripMargin)
   ).map { case (name, sqlText) =>
-    Query(name + "-v1.4", sqlText, description = "TPCDS 1.4 Query", executionMode = executionMode)
+    Query(name + "-v1.4", sqlText, description = "TPCDS 1.4 Query", executionMode = {
+      executionMode match {
+        case WriteParquet(location) =>
+          WriteParquet(location + s"/$name")
+        case exeMode => exeMode
+      }
+    })
   }
   val tpcds1_4QueriesMap = tpcds1_4Queries.map(q => q.name.split("-").get(0) -> q).toMap
 

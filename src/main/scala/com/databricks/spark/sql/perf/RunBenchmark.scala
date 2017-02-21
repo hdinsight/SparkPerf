@@ -23,7 +23,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.{SparkConf, SparkContext}
 import scala.util.Try
 
-import com.databricks.spark.sql.perf.queries.Benchmark
+import com.databricks.spark.sql.perf.queries.{Benchmark, Query}
 import com.databricks.spark.sql.perf.report.ExecutionMode
 
 case class RunConfig(
@@ -116,7 +116,9 @@ object RunBenchmark {
       newInstance({config.executionMode match {
         case "foreach" => ExecutionMode.ForeachResults
         case "collect" => ExecutionMode.CollectResults
-        case "parquet" => ExecutionMode.WriteParquet(config.outputDir)
+        case "parquet" =>
+          println(s"====writing results to ${config.outputDir}====")
+          ExecutionMode.WriteParquet(config.outputDir)
       }}).asInstanceOf[Benchmark]
 
     val allQueries = config.filter.map { f =>

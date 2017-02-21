@@ -23,7 +23,7 @@ import scala.language.implicitConversions
 import com.databricks.spark.sql.perf.Benchmarkable
 import com.databricks.spark.sql.perf.report.{BenchmarkResult, BreakdownResult, ExecutionMode, Failure}
 
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, SaveMode}
 import org.apache.spark.sql.catalyst.analysis.UnresolvedRelation
 import org.apache.spark.sql.execution.SparkPlan
 
@@ -70,6 +70,7 @@ class Query(
       description: String = "",
       messages: ArrayBuffer[String]): BenchmarkResult = {
     try {
+      println(s"***************$executionMode================")
       val dataFrame = buildDataFrame
       val queryExecution = dataFrame.queryExecution
       // We are not counting the time of ScalaReflection.convertRowToScala.
@@ -119,17 +120,18 @@ class Query(
         Seq.empty[BreakdownResult]
       }
 
+      println(s"==============$executionMode================")
+
       // The executionTime for the entire query includes the time of type conversion from catalyst
       // to scala.
-      // The executionTime for the entire query includes the time of type conversion
-      // from catalyst to scala.
       var result: Option[Long] = None
       val executionTime = measureTimeMs {
         executionMode match {
           case ExecutionMode.CollectResults => dataFrame.rdd.collect()
           case ExecutionMode.ForeachResults => dataFrame.rdd.foreach { row => Unit }
           case ExecutionMode.WriteParquet(location) =>
-            dataFrame.write.parquet(s"$location/$name.parquet")
+            println(s"===============writing to $location/$name==============")
+            dataFrame.write.format("parquet").mode(SaveMode.Overwrite).save(s"$location/$name")
           case ExecutionMode.HashResults =>
             // SELECT SUM(CRC32(CONCAT_WS(", ", *))) FROM (benchmark query)
             val row =
