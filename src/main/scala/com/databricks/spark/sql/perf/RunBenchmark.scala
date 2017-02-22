@@ -126,7 +126,7 @@ object RunBenchmark {
         config.s3SecretKey)
     }
 
-    sparkSession.sql(s"USE ${config.databaseName}")
+    // sparkSession.sql(s"USE ${config.databaseName}")
 
     buildTables(config)
 
