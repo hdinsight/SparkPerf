@@ -27,6 +27,8 @@ import scala.util.Try
 import com.databricks.spark.sql.perf.queries.tpcds.Tables
 import com.databricks.spark.sql.perf.queries.{Benchmark, Query}
 import com.databricks.spark.sql.perf.report.ExecutionMode
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.{FileSystem, Path}
 
 case class RunConfig(
     benchmarkName: String = null,
@@ -94,12 +96,15 @@ object RunBenchmark {
 
   private def buildTables(config: RunConfig): Unit = {
     val tablePath = config.databasePath
-    val allDirectories = new File(tablePath).listFiles()
-    for (dir <- allDirectories if dir.isDirectory) {
-      val dirPath = dir.getPath
-      val name = dir.getName
-      val loadedDF = SparkSession.builder().getOrCreate().read.parquet(dirPath)
-      loadedDF.createOrReplaceTempView(name)
+    val allDirectories = FileSystem.get(new Configuration).listFiles(new Path(tablePath), false)
+    while (allDirectories.hasNext) {
+      val dir = allDirectories.next()
+      if (dir.isDirectory) {
+        val dirPath = dir.getPath.toString
+        val name = dir.getPath.getName
+        val loadedDF = SparkSession.builder().getOrCreate().read.parquet(dirPath)
+        loadedDF.createOrReplaceTempView(name)
+      }
     }
   }
 
