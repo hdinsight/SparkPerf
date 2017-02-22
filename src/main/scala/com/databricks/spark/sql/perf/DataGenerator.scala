@@ -9,6 +9,7 @@ object DataGenerator {
     val dsdgenPath = args(0)
     val scaleFactor = args(1).toInt
     val tableLocation = args(2)
+    val genData = args(3).toBoolean
 
     val sparkSession = SparkSession
       .builder()
@@ -17,22 +18,13 @@ object DataGenerator {
       .enableHiveSupport()
       .getOrCreate()
 
-    println("hello")
-
     if (args.length > 4) {
       sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.impl",
         "org.apache.hadoop.fs.s3native.NativeS3FileSystem")
       sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.awsAccessKeyId",
-        args(3))
-      sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.awsSecretAccessKey",
         args(4))
-    }
-    val genData = {
-      if (args.length > 4) {
-        args(5).toBoolean
-      } else {
-        args(3).toBoolean
-      }
+      sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.awsSecretAccessKey",
+        args(5))
     }
     import com.databricks.spark.sql.perf.queries.tpcds.Tables
     val tables = new Tables(sparkSession.sqlContext, dsdgenPath, scaleFactor)
