@@ -103,6 +103,7 @@ object RunBenchmark {
         val dirPath = dir.getPath.toString
         val name = dir.getPath.getName
         val loadedDF = SparkSession.builder().getOrCreate().read.parquet(dirPath)
+        println(s"register $name")
         loadedDF.createOrReplaceTempView(name)
       }
     }
