@@ -16,6 +16,7 @@
 
 package com.databricks.spark.sql.perf
 
+import java.io.File
 import java.net.InetAddress
 
 import org.apache.spark.sql.{SQLContext, SparkSession}
@@ -23,6 +24,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.{SparkConf, SparkContext}
 import scala.util.Try
 
+import com.databricks.spark.sql.perf.queries.tpcds.Tables
 import com.databricks.spark.sql.perf.queries.{Benchmark, Query}
 import com.databricks.spark.sql.perf.report.ExecutionMode
 
@@ -90,6 +92,17 @@ object RunBenchmark {
     }
   }
 
+  private def buildTables(config: RunConfig): Unit = {
+    val tablePath = config.databasePath
+    val allDirectories = new File(tablePath).listFiles()
+    for (dir <- allDirectories if dir.isDirectory) {
+      val dirPath = dir.getPath
+      val name = dir.getName
+      val loadedDF = SparkSession.builder().getOrCreate().read.parquet(dirPath)
+      loadedDF.createOrReplaceTempView(name)
+    }
+  }
+
   def run(config: RunConfig): Unit = {
     val sparkSession = SparkSession
       .builder()
@@ -110,6 +123,8 @@ object RunBenchmark {
 
     sparkSession.sql(s"USE ${config.databaseName}")
 
+    buildTables(config)
+
     sparkSession.sqlContext.setConf("spark.sql.perf.results",
       new java.io.File("performance").toURI.toString)
     val benchmark = Class.forName(config.benchmarkName).getConstructor(classOf[ExecutionMode]).
@@ -117,7 +132,6 @@ object RunBenchmark {
         case "foreach" => ExecutionMode.ForeachResults
         case "collect" => ExecutionMode.CollectResults
         case "parquet" =>
-          println(s"====writing results to ${config.outputDir}====")
           ExecutionMode.WriteParquet(config.outputDir)
       }}).asInstanceOf[Benchmark]
 

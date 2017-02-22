@@ -178,6 +178,7 @@ class Tables(sqlContext: SQLContext, dsdgenDir: String, scaleFactor: Int) extend
       if (overwrite) {
         sqlContext.sql(s"DROP TABLE IF EXISTS $databaseName.$name")
       }
+
       if (!tableExists || overwrite) {
         println(s"Creating external table $name in database $databaseName using data stored in $location.")
         log.info(s"Creating external table $name in database $databaseName using data stored in $location.")
@@ -737,4 +738,8 @@ class Tables(sqlContext: SQLContext, dsdgenDir: String, scaleFactor: Int) extend
       'web_gmt_offset           .string,
       'web_tax_percentage       .decimal(5,2))
   )
+}
+
+object Tables {
+
 }
