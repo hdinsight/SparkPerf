@@ -632,10 +632,10 @@ class Tpcds_1_4_Queries(executionMode: ExecutionMode)
             | LIMIT 100
             """.stripMargin),
     ("q13", """
-            | select avg(ss_quantity)
-            |       ,avg(ss_ext_sales_price)
-            |       ,avg(ss_ext_wholesale_cost)
-            |       ,sum(ss_ext_wholesale_cost)
+            | select avg(ss_quantity) ss_quantity_avr
+            |       ,avg(ss_ext_sales_price) ss_ext_sales_price_avr
+            |       ,avg(ss_ext_wholesale_cost) ss_ext_wholesale_cost_avr
+            |       ,sum(ss_ext_wholesale_cost) ss_ext_wholesale_cost_sum
             | from store_sales
             |     ,store
             |     ,customer_demographics
@@ -827,7 +827,7 @@ class Tpcds_1_4_Queries(executionMode: ExecutionMode)
             | limit 100
             """.stripMargin),
     ("q15", """
-            | select ca_zip, sum(cs_sales_price)
+            | select ca_zip, sum(cs_sales_price) cs_sales_price_sum
             | from catalog_sales, customer, customer_address, date_dim
             | where cs_bill_customer_sk = c_customer_sk
             | 	and c_current_addr_sk = ca_address_sk
