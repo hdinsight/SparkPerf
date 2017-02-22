@@ -96,7 +96,9 @@ object RunBenchmark {
 
   private def buildTables(config: RunConfig): Unit = {
     val tablePath = config.databasePath
-    val allDirectories = FileSystem.get(new Configuration).listFiles(new Path(tablePath), false)
+    println(s"listing $tablePath")
+    val allDirectories = new Path(tablePath).getFileSystem(SparkSession.builder().getOrCreate().
+      sparkContext.hadoopConfiguration).listFiles(new Path(tablePath), false)
     while (allDirectories.hasNext) {
       val dir = allDirectories.next()
       println(dir)
