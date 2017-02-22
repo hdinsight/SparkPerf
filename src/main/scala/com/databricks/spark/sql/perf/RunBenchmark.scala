@@ -113,7 +113,7 @@ object RunBenchmark {
       .builder()
       .appName("Spark SQL basic example")
       .config("spark.sql.warehouse.dir", config.databasePath)
-      .enableHiveSupport()
+      // .enableHiveSupport()
       .getOrCreate()
     import sparkSession.implicits._
 
