@@ -99,6 +99,7 @@ object RunBenchmark {
     val allDirectories = FileSystem.get(new Configuration).listFiles(new Path(tablePath), false)
     while (allDirectories.hasNext) {
       val dir = allDirectories.next()
+      println(dir)
       if (dir.isDirectory) {
         val dirPath = dir.getPath.toString
         val name = dir.getPath.getName
@@ -130,6 +131,7 @@ object RunBenchmark {
     // sparkSession.sql(s"USE ${config.databaseName}")
 
     buildTables(config)
+    println("built all tables")
 
     sparkSession.sqlContext.setConf("spark.sql.perf.results",
       new java.io.File("performance").toURI.toString)
