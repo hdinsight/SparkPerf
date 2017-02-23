@@ -95,21 +95,14 @@ object RunBenchmark {
   }
 
   private def buildTables(config: RunConfig): Unit = {
-    val tablePath = config.databasePath
-    println(s"listing $tablePath")
-    val allDirectories = new Path(tablePath).getFileSystem(SparkSession.builder().getOrCreate().
-      sparkContext.hadoopConfiguration).listFiles(new Path(tablePath), false)
-    while (allDirectories.hasNext) {
-      val dir = allDirectories.next()
-      println(dir)
-      if (dir.isDirectory) {
-        val dirPath = dir.getPath.toString
-        val name = dir.getPath.getName
-        val loadedDF = SparkSession.builder().getOrCreate().read.parquet(dirPath)
-        println(s"register $name")
-        loadedDF.createOrReplaceTempView(name)
-      }
-    }
+    val sparkSession = SparkSession.builder().getOrCreate()
+    val sqlContext = SparkSession.builder().getOrCreate().sqlContext
+    val dummyTablesObj = new Tables(sqlContext, "", 1)
+    dummyTablesObj.tables.foreach(table => {
+      val df = sparkSession.read.parquet(s"${config.databasePath}/${table.name}")
+      println(s"register ${table.name}")
+      df.createOrReplaceTempView(s"${table.name}")
+    })
   }
 
   def run(config: RunConfig): Unit = {
