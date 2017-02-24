@@ -19,11 +19,11 @@ object DataGenerator {
       .getOrCreate()
 
     if (args.length > 4) {
-      sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.impl",
+      sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.impl",
         "org.apache.hadoop.fs.s3a.S3AFileSystem")
-      sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.awsAccessKeyId",
+      sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.awsAccessKeyId",
         args(4))
-      sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.awsSecretAccessKey",
+      sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.awsSecretAccessKey",
         args(5))
     }
     import com.databricks.spark.sql.perf.queries.tpcds.Tables
