@@ -14,7 +14,7 @@ object DataGenerator {
     val sparkSession = SparkSession
       .builder()
       .appName("Spark SQL basic example")
-      .config("spark.sql.warehouse.dir", tableLocation)
+      // .config("spark.sql.warehouse.dir", tableLocation)
       // .enableHiveSupport()
       .getOrCreate()
 
