@@ -56,6 +56,8 @@ libraryDependencies += "net.java.dev.jets3t" % "jets3t" % "0.9.4"
 
 libraryDependencies += "org.apache.hadoop" % "hadoop-aws" % "2.7.3"
 
+libraryDependencies += "com.amazonaws" % "aws-java-sdk-s3" % "1.11.95"
+
 fork := true
 
 licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
