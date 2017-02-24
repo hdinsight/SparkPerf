@@ -15,7 +15,7 @@ object DataGenerator {
       .builder()
       .appName("Spark SQL basic example")
       .config("spark.sql.warehouse.dir", tableLocation)
-      .enableHiveSupport()
+      // .enableHiveSupport()
       .getOrCreate()
 
     if (args.length > 4) {
