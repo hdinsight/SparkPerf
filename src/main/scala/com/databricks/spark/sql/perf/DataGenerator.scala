@@ -20,7 +20,7 @@ object DataGenerator {
 
     if (args.length > 4) {
       sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.impl",
-        "org.apache.hadoop.fs.s3native.NativeS3FileSystem")
+        "org.apache.hadoop.fs.s3a.S3AFileSystem")
       sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.awsAccessKeyId",
         args(4))
       sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.awsSecretAccessKey",

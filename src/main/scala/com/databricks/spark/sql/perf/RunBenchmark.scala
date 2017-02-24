@@ -108,15 +108,13 @@ object RunBenchmark {
   def run(config: RunConfig): Unit = {
     val sparkSession = SparkSession
       .builder()
-      .appName("Spark SQL basic example")
       .config("spark.sql.warehouse.dir", config.databasePath)
-      // .enableHiveSupport()
       .getOrCreate()
     import sparkSession.implicits._
 
     if (config.s3AccessKey != null) {
       sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.impl",
-        "org.apache.hadoop.fs.s3native.NativeS3FileSystem")
+        "org.apache.hadoop.fs.s3a.S3AFileSystem")
       sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.awsAccessKeyId",
         config.s3AccessKey)
       sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.awsSecretAccessKey",
