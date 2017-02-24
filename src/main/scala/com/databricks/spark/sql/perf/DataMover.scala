@@ -12,7 +12,7 @@ object DataMover {
     val sparkSession = SparkSession.builder().getOrCreate()
     val dummyTableObj = new Tables(sparkSession.sqlContext, "", 1)
     val tables = dummyTableObj.tables
-    for ((tableName, _) <- tables.map(_.name)) {
+    for (tableName <- tables.map(_.name)) {
       val df = sparkSession.read.parquet(srcPath + "/" + tableName)
       df.write.parquet(dstPath)
     }
