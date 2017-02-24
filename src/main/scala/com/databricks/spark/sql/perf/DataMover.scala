@@ -20,9 +20,9 @@ object DataMover {
       args(3))
 
     val tables = dummyTableObj.tables
-    for (tableName <- tables.map(_.name)) {
-      val df = sparkSession.read.parquet(srcPath + "/" + tableName)
-      df.write.parquet(dstPath)
+    for (table <- tables) {
+      val df = sparkSession.read.parquet(srcPath + "/" + table.name)
+      df.write.partitionBy(table.partitionColumns :_*).parquet(dstPath + "/" + table.name)
     }
   }
 }
