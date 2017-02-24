@@ -166,7 +166,7 @@ object RunBenchmark {
           avg($"executionTime") as 'avgTimeMs,
           stddev($"executionTime") as 'stdDev)
         .orderBy("name")
-        .show(truncate = false)
+        .show(100, truncate = false)
     println(s"""Results: sqlContext.read.json("${experiment.resultPath}")""")
 
     config.baseline.foreach { baseTimestamp =>
