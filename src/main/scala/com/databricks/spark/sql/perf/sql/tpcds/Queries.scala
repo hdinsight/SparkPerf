@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.databricks.spark.sql.perf.queries
+package com.databricks.spark.sql.perf.sql.tpcds
 
 import com.databricks.spark.sql.perf.report.ExecutionMode
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.databricks.spark.sql.perf.queries
+package com.databricks.spark.sql.perf.sql.tpcds
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -23,9 +23,9 @@ import scala.language.implicitConversions
 import com.databricks.spark.sql.perf.Benchmarkable
 import com.databricks.spark.sql.perf.report.{BenchmarkResult, BreakdownResult, ExecutionMode, Failure}
 
-import org.apache.spark.sql.{DataFrame, SaveMode}
 import org.apache.spark.sql.catalyst.analysis.UnresolvedRelation
 import org.apache.spark.sql.execution.SparkPlan
+import org.apache.spark.sql.{DataFrame, SaveMode}
 
 
 /** Holds one benchmark query and its metadata. */

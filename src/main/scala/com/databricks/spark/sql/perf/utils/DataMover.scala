@@ -1,6 +1,6 @@
-package com.databricks.spark.sql.perf
+package com.databricks.spark.sql.perf.utils
 
-import com.databricks.spark.sql.perf.queries.tpcds.Tables
+import com.databricks.spark.sql.perf.sql.tpcds.Tables
 
 import org.apache.spark.sql.SparkSession
 

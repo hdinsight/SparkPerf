@@ -1,9 +1,9 @@
-package com.databricks.spark.sql.perf
+package com.databricks.spark.sql.perf.sql.tpcds
 
 import org.apache.spark.sql.SparkSession
 
 
-object DataGenerator {
+object TPCDSDataGenerator {
 
   def main(args: Array[String]): Unit = {
     val dsdgenPath = args(0)
@@ -26,7 +26,6 @@ object DataGenerator {
       sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.secret.key",
         args(5))
     }
-    import com.databricks.spark.sql.perf.queries.tpcds.Tables
     val tables = new Tables(sparkSession.sqlContext, dsdgenPath, scaleFactor)
 
     if (genData) {

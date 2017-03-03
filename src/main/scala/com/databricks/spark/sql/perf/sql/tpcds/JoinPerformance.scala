@@ -1,4 +1,4 @@
-package com.databricks.spark.sql.perf.queries
+package com.databricks.spark.sql.perf.sql.tpcds
 
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
