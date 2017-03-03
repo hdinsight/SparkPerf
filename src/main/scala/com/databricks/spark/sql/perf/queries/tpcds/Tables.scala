@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.databricks.spark.sql.perf.tpcds
+package com.databricks.spark.sql.perf.queries.tpcds
 
 import scala.sys.process._
 
@@ -178,6 +178,7 @@ class Tables(sqlContext: SQLContext, dsdgenDir: String, scaleFactor: Int) extend
       if (overwrite) {
         sqlContext.sql(s"DROP TABLE IF EXISTS $databaseName.$name")
       }
+
       if (!tableExists || overwrite) {
         println(s"Creating external table $name in database $databaseName using data stored in $location.")
         log.info(s"Creating external table $name in database $databaseName using data stored in $location.")
@@ -215,20 +216,25 @@ class Tables(sqlContext: SQLContext, dsdgenDir: String, scaleFactor: Int) extend
       }
     }
 
-    val withSpecifiedDataType = if (useDoubleForDecimal) {
+    val tablesWithSpecifiedDataType = if (useDoubleForDecimal) {
       tablesToBeGenerated.map(_.useDoubleForDecimal())
     } else {
       tablesToBeGenerated
     }
 
-    withSpecifiedDataType.foreach { table =>
+    tablesWithSpecifiedDataType.foreach { table =>
       val tableLocation = s"$location/${table.name}"
       table.genData(tableLocation, format, overwrite, clusterByPartitionColumns,
         filterOutNullPartitionValues, numPartitions)
     }
   }
 
-  def createExternalTables(location: String, format: String, databaseName: String, overwrite: Boolean, tableFilter: String = ""): Unit = {
+  def createExternalTables(
+      location: String,
+      format: String,
+      databaseName: String,
+      overwrite: Boolean,
+      tableFilter: String = ""): Unit = {
     val filtered = if (tableFilter.isEmpty) {
       tables
     } else {
@@ -732,4 +738,8 @@ class Tables(sqlContext: SQLContext, dsdgenDir: String, scaleFactor: Int) extend
       'web_gmt_offset           .string,
       'web_tax_percentage       .decimal(5,2))
   )
+}
+
+object Tables {
+
 }

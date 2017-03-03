@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.databricks.spark.sql.perf.bigdata
+package com.databricks.spark.sql.perf.queries
 
-import com.databricks.spark.sql.perf.{ExecutionMode, Benchmark}
+import com.databricks.spark.sql.perf.report.ExecutionMode
 
 trait Queries extends Benchmark {
 

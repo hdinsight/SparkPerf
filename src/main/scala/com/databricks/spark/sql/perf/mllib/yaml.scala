@@ -5,14 +5,12 @@ import java.util.{ArrayList => AL}
 import scala.concurrent.duration._
 import scala.collection.JavaConverters._
 import scala.io.Source
-
 import scala.reflect._
 import scala.reflect.runtime.universe._
-import scala.util.{Try => STry, Success, Failure}
+import scala.util.{Failure, Success, Try => STry}
 
+import com.databricks.spark.sql.perf.report.MLParams
 import org.yaml.snakeyaml.Yaml
-
-import com.databricks.spark.sql.perf.{MLParams}
 
 
 /**

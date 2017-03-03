@@ -16,18 +16,16 @@
 
 package com.databricks.spark.sql.perf
 
-import java.io.{FileOutputStream, File}
-
-import org.apache.hadoop.conf.Configuration
-import org.apache.spark.sql.{DataFrame, SQLContext, Row}
-import org.apache.spark.sql.functions._
+import java.io.{File, FileOutputStream}
 
 import scala.language.reflectiveCalls
 import scala.sys.process._
 
+import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 
-import com.twitter.jvm.CpuProfile
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.{DataFrame, Row, SQLContext}
 
 /**
  * A collection of utilities for parsing stacktraces that have been recorded in JSON and generating visualizations
@@ -55,7 +53,6 @@ package object cpu {
   def getCpuLocation(timestamp: Long) = s"$resultsLocation/timestamp=$timestamp"
 
   def collectLogs(sqlContext: SQLContext, fs: FS, timestamp: Long): String = {
-    import sqlContext.implicits._
 
     def sc = sqlContext.sparkContext
 

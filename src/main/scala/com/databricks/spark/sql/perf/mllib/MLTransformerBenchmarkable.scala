@@ -1,10 +1,12 @@
 package com.databricks.spark.sql.perf.mllib
 
-import com.databricks.spark.sql.perf._
+import com.databricks.spark.sql.perf.{Benchmarkable, _}
 import com.typesafe.scalalogging.slf4j.{LazyLogging => Logging}
 
 import org.apache.spark.sql._
 import scala.collection.mutable.ArrayBuffer
+
+import com.databricks.spark.sql.perf.report._
 
 import org.apache.spark.ml.Transformer
 

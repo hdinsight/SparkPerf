@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.databricks.spark.sql.perf
+package com.databricks.spark.sql.perf.report
 
 /**
  * The performance results of all given queries for a single iteration.

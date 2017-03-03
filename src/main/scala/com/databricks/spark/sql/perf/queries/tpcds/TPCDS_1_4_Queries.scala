@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package com.databricks.spark.sql.perf.tpcds
+package com.databricks.spark.sql.perf.queries.tpcds
 
-import com.databricks.spark.sql.perf.{Benchmark, ExecutionMode, Query}
+import com.databricks.spark.sql.perf.queries.{Benchmark, Query}
+import com.databricks.spark.sql.perf.report.ExecutionMode
 
 /**
  * This implements the official TPCDS v1.4 queries with only cosmetic modifications
  * (noted for each query).
  * Don't modify this except for these kind of modifications.
  */
-trait Tpcds_1_4_Queries extends Benchmark {
+class Tpcds_1_4_Queries(executionMode: ExecutionMode)
+  extends Benchmark {
 
-  import ExecutionMode._
+  import com.databricks.spark.sql.perf.report.ExecutionMode._
 
   // should be random generated based on scale
   // RC=ulist(random(1, rowcount("store_sales")/5,uniform),5);
@@ -630,10 +632,10 @@ trait Tpcds_1_4_Queries extends Benchmark {
             | LIMIT 100
             """.stripMargin),
     ("q13", """
-            | select avg(ss_quantity)
-            |       ,avg(ss_ext_sales_price)
-            |       ,avg(ss_ext_wholesale_cost)
-            |       ,sum(ss_ext_wholesale_cost)
+            | select avg(ss_quantity) ss_quantity_avr
+            |       ,avg(ss_ext_sales_price) ss_ext_sales_price_avr
+            |       ,avg(ss_ext_wholesale_cost) ss_ext_wholesale_cost_avr
+            |       ,sum(ss_ext_wholesale_cost) ss_ext_wholesale_cost_sum
             | from store_sales
             |     ,store
             |     ,customer_demographics
@@ -825,7 +827,7 @@ trait Tpcds_1_4_Queries extends Benchmark {
             | limit 100
             """.stripMargin),
     ("q15", """
-            | select ca_zip, sum(cs_sales_price)
+            | select ca_zip, sum(cs_sales_price) cs_sales_price_sum
             | from catalog_sales, customer, customer_address, date_dim
             | where cs_bill_customer_sk = c_customer_sk
             | 	and c_current_addr_sk = ca_address_sk
@@ -3859,7 +3861,13 @@ trait Tpcds_1_4_Queries extends Benchmark {
           |from store_sales
         """.stripMargin)
   ).map { case (name, sqlText) =>
-    Query(name + "-v1.4", sqlText, description = "TPCDS 1.4 Query", executionMode = CollectResults)
+    Query(name + "-v1.4", sqlText, description = "TPCDS 1.4 Query", executionMode = {
+      executionMode match {
+        case WriteParquet(location) =>
+          WriteParquet(location + s"/$name")
+        case exeMode => exeMode
+      }
+    })
   }
   val tpcds1_4QueriesMap = tpcds1_4Queries.map(q => q.name.split("-").get(0) -> q).toMap
 
@@ -3875,5 +3883,4 @@ trait Tpcds_1_4_Queries extends Benchmark {
     "q80", "q82", "q84", "q85", "q86", "q87", "q88", "q89",
     "q90", "q91", "q93", "q96", "q97", "q98", "q99", "qSsMax").map(tpcds1_4QueriesMap)
 
-  val all: Seq[Query] = tpcds1_4QueriesMap.values.toSeq
 }

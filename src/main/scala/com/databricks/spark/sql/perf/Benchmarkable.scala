@@ -18,13 +18,15 @@ package com.databricks.spark.sql.perf
 
 import java.util.UUID
 
+import scala.collection.mutable.ArrayBuffer
+import scala.concurrent.duration._
+
+import com.databricks.spark.sql.perf.queries.Query
+import com.databricks.spark.sql.perf.report.{BenchmarkResult, ExecutionMode, Failure}
 import com.typesafe.scalalogging.slf4j.{LazyLogging => Logging}
 
-import scala.concurrent.duration._
-import scala.collection.mutable.ArrayBuffer
-
 import org.apache.spark.sql.SQLContext
-import org.apache.spark.{SparkEnv, SparkContext}
+import org.apache.spark.{SparkContext, SparkEnv}
 
 
 /** A trait to describe things that can be benchmarked. */

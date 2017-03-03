@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package com.databricks.spark.sql.perf.tpcds
+package com.databricks.spark.sql.perf.queries.tpcds
 
-import com.databricks.spark.sql.perf.{ExecutionMode, Benchmark}
+import com.databricks.spark.sql.perf.queries.Benchmark
+import com.databricks.spark.sql.perf.report.ExecutionMode
 
-trait ImpalaKitQueries extends Benchmark {
+class ImpalaKitQueries(executionMode: ExecutionMode = ExecutionMode.ForeachResults) extends Benchmark {
 
   import ExecutionMode._
 
   // Queries are from
   // https://github.com/cloudera/impala-tpcds-kit/tree/master/queries-sql92-modified/queries
   val queries = Seq(
-    ("q19", """
+    ("q19",
+      """
               |-- start query 1 in stream 0 using template query19.tpl
               |select
               |  i_brand_id,
@@ -60,9 +62,11 @@ trait ImpalaKitQueries extends Benchmark {
               |  i_manufact
               |limit 100
               |-- end query 1 in stream 0 using template query19.tpl
-            """.stripMargin),
+            """.
+        stripMargin),
 
-    ("q27", """
+    ("q27",
+      """
               |-- start query 1 in stream 0 using template query27.tpl
               |select
               |  i_item_id,
@@ -97,7 +101,8 @@ trait ImpalaKitQueries extends Benchmark {
               |-- end query 1 in stream 0 using template query27.tpl
             """.stripMargin),
 
-    ("q3", """
+    ("q3",
+      """
              |-- start query 1 in stream 0 using template query3.tpl
              |select
              |  dt.d_year,
@@ -141,7 +146,8 @@ trait ImpalaKitQueries extends Benchmark {
              |limit 100
            """.stripMargin),
 
-    ("q34", """
+    ("q34",
+      """
               |-- start query 1 in stream 0 using template query34.tpl
               |select
               |  c_last_name,
@@ -186,9 +192,12 @@ trait ImpalaKitQueries extends Benchmark {
               |  cnt
               |limit 1000
               |-- end query 1 in stream 0 using template query34.tpl
-            """.stripMargin),
+            """.
+        stripMargin),
 
-    ("q42", """
+    (
+      "q42",
+      """
               |-- start query 1 in stream 0 using template query42.tpl
               |select
               |  d_year,
@@ -219,7 +228,8 @@ trait ImpalaKitQueries extends Benchmark {
               |-- end query 1 in stream 0 using template query42.tpl
             """.stripMargin),
 
-    ("q43", """
+    ("q43",
+      """
               |-- start query 1 in stream 0 using template query43.tpl
               |select
               |  s_store_name,
@@ -257,7 +267,8 @@ trait ImpalaKitQueries extends Benchmark {
               |-- end query 1 in stream 0 using template query43.tpl
             """.stripMargin),
 
-    ("q46", """
+    ("q46",
+      """
               |-- start query 1 in stream 0 using template query46.tpl
               |select
               |  c_last_name,
@@ -335,7 +346,8 @@ trait ImpalaKitQueries extends Benchmark {
               |-- end query 1 in stream 0 using template query46.tpl
             """.stripMargin),
 
-    ("q52", """
+    ("q52",
+      """
               |-- start query 1 in stream 0 using template query52.tpl
               |select
               |  d_year,
@@ -364,7 +376,8 @@ trait ImpalaKitQueries extends Benchmark {
               |-- end query 1 in stream 0 using template query52.tpl
             """.stripMargin),
 
-    ("q53", """
+    ("q53",
+      """
               |-- start query 1 in stream 0 using template query53.tpl
               |select
               |  *
@@ -407,7 +420,8 @@ trait ImpalaKitQueries extends Benchmark {
               |-- end query 1 in stream 0 using template query53.tpl
             """.stripMargin),
 
-    ("q55", """
+    ("q55",
+      """
               |-- start query 1 in stream 0 using template query55.tpl
               |select
               |  i_brand_id,
@@ -433,19 +447,20 @@ trait ImpalaKitQueries extends Benchmark {
               |-- end query 1 in stream 0 using template query55.tpl
             """.stripMargin),
 
-    ("q59", """
+    ("q59",
+      """
               |-- start query 1 in stream 0 using template query59.tpl
               |select
               |  s_store_name1,
               |  s_store_id1,
               |  d_week_seq1,
-              |  sun_sales1 / sun_sales2,
-              |  mon_sales1 / mon_sales2,
-              |  tue_sales1 / tue_sales2,
-              |  wed_sales1 / wed_sales2,
-              |  thu_sales1 / thu_sales2,
-              |  fri_sales1 / fri_sales2,
-              |  sat_sales1 / sat_sales2
+              |  sun_sales1 / sun_sales2 sun_sales_ratio,
+              |  mon_sales1 / mon_sales2 mon_sales_ratio,
+              |  tue_sales1 / tue_sales2 tue_sales_ratio,
+              |  wed_sales1 / wed_sales2 wed_sales_ratio,
+              |  thu_sales1 / thu_sales2 thu_sales_ratio,
+              |  fri_sales1 / fri_sales2 fri_sales_ratio,
+              |  sat_sales1 / sat_sales2 sat_sales_ratio
               |from
               |  (select
               |    s_store_name s_store_name1,
@@ -533,7 +548,8 @@ trait ImpalaKitQueries extends Benchmark {
               |-- end query 1 in stream 0 using template query59.tpl
             """.stripMargin),
 
-    ("q63", """
+    ("q63",
+      """
               |-- start query 1 in stream 0 using template query63.tpl
               |select
               |  *
@@ -576,7 +592,8 @@ trait ImpalaKitQueries extends Benchmark {
               |-- end query 1 in stream 0 using template query63.tpl
             """.stripMargin),
 
-    ("q65", """
+    ("q65",
+      """
               |--q65
               |-- start query 1 in stream 0 using template query65.tpl
               |select
@@ -636,7 +653,8 @@ trait ImpalaKitQueries extends Benchmark {
               |-- end query 1 in stream 0 using template query65.tpl
             """.stripMargin),
 
-    ("q68", """
+    ("q68",
+      """
               |-- start query 1 in stream 0 using template query68.tpl
               |select
               |  c_last_name,
@@ -695,7 +713,9 @@ trait ImpalaKitQueries extends Benchmark {
               |-- end query 1 in stream 0 using template query68.tpl
             """.stripMargin),
 
-    ("q7", """
+    ("q7"
+      ,
+      """
              |-- start query 1 in stream 0 using template query7.tpl
              |select
              |  i_item_id,
@@ -726,7 +746,8 @@ trait ImpalaKitQueries extends Benchmark {
              |-- end query 1 in stream 0 using template query7.tpl
            """.stripMargin),
 
-    ("q73", """
+    ("q73",
+      """
               |-- start query 1 in stream 0 using template query73.tpl
               |select
               |  c_last_name,
@@ -777,7 +798,8 @@ trait ImpalaKitQueries extends Benchmark {
               |-- end query 1 in stream 0 using template query73.tpl
             """.stripMargin),
 
-    ("q79", """
+    ("q79",
+      """
               |-- start query 1 in stream 0 using template query79.tpl
               |select
               |  c_last_name,
@@ -825,7 +847,8 @@ trait ImpalaKitQueries extends Benchmark {
               |-- end query 1 in stream 0 using template query79.tpl
             """.stripMargin),
 
-    ("q8", """
+    ("q8",
+      """
              |-- start query 8 in stream 0 using template query8.tpl
              |select  s_store_name
              |      ,sum(ss_net_profit)
@@ -885,9 +908,12 @@ trait ImpalaKitQueries extends Benchmark {
              | order by s_store_name
              |limit 100
              |-- end query 8 in stream 0 using template query8.tpl
-           """.stripMargin),
+           """.
+        stripMargin),
 
-    ("q82", """
+    (
+      "q82",
+      """
               |-- start query 1 in stream 0 using template query82.tpl
               |select
               |  i_item_id,
@@ -914,7 +940,8 @@ trait ImpalaKitQueries extends Benchmark {
               |-- end query 1 in stream 0 using template query82.tpl
             """.stripMargin),
 
-    ("q89", """
+    ("q89",
+      """
               |-- start query 1 in stream 0 using template query89.tpl
               |select
               |  *
@@ -960,7 +987,8 @@ trait ImpalaKitQueries extends Benchmark {
               |-- end query 1 in stream 0 using template query89.tpl
             """.stripMargin),
 
-    ("q98", """
+    ("q98",
+      """
               |-- start query 1 in stream 0 using template query98.tpl
               |select
               |  i_item_desc,
@@ -997,7 +1025,8 @@ trait ImpalaKitQueries extends Benchmark {
               |-- end query 1 in stream 0 using template query98.tpl
             """.stripMargin),
 
-    ("ss_max", """
+    ("ss_max",
+      """
                  |select
                  |  count(*) as total,
                  |  count(ss_sold_date_sk) as not_null_total,
@@ -1014,12 +1043,19 @@ trait ImpalaKitQueries extends Benchmark {
                  |from store_sales
                """.stripMargin)
   ).map {
-    case (name, sqlText) => Query(name, sqlText, description = "", executionMode = CollectResults)
+    case (name, sqlText) => Query(name, sqlText, description = "", executionMode = {
+      executionMode match {
+        case WriteParquet(location) =>
+          WriteParquet(location + s"/$name")
+        case exeMode => exeMode
+      }
+    })
   }
   val queriesMap = queries.map(q => q.name -> q).toMap
 
   val originalQueries = Seq(
-    ("q3", """
+    ("q3",
+      """
       select  d_year
       ,item.i_brand_id brand_id
       ,item.i_brand brand
@@ -1059,7 +1095,8 @@ trait ImpalaKitQueries extends Benchmark {
     order by i_item_id
     limit 100"""),
 
-    ("q19", """
+    ("q19",
+      """
       select  i_brand_id, i_brand, i_manufact_id, i_manufact,
       sum(ss_ext_sales_price) as ext_price
         from date_dim
@@ -1084,7 +1121,8 @@ trait ImpalaKitQueries extends Benchmark {
       ,i_manufact
         limit 100"""),
 
-    ("q27", """
+    ("q27",
+      """
       select  i_item_id,
       s_state,
       avg(ss_quantity) agg1,
@@ -1184,7 +1222,8 @@ trait ImpalaKitQueries extends Benchmark {
     order by s_store_name, s_store_id,sun_sales,mon_sales,tue_sales,wed_sales,thu_sales,fri_sales,sat_sales
     limit 100"""),
 
-    ("q46", """
+    ("q46",
+      """
       select  c_last_name
       ,c_first_name
       ,ca_city
@@ -1459,12 +1498,19 @@ trait ImpalaKitQueries extends Benchmark {
         |from store_sales
       """.stripMargin)
   ).map { case (name, sqlText) =>
-    Query(name, sqlText, description = "original query", executionMode = CollectResults)
+    Query(name, sqlText, description = "original query", executionMode = {
+      executionMode match {
+        case WriteParquet(location) =>
+          WriteParquet(location + s"/$name")
+        case exeMode => exeMode
+      }
+    })
   }
 
-  val interactiveQueries =
+  private val interactiveQueries =
     Seq("q19", "q42", "q52", "q55", "q63", "q68", "q73", "q98").map(queriesMap)
-  val reportingQueries = Seq("q3","q7", "q27","q43", "q53", "q89").map(queriesMap)
-  val deepAnalyticQueries = Seq("q34", "q46", "q59", "q65",  "q79", "ss_max").map(queriesMap)
-  val impalaKitQueries = interactiveQueries ++ reportingQueries ++ deepAnalyticQueries
+  private val reportingQueries = Seq("q3","q7", "q27","q43", "q53", "q89").map(queriesMap)
+  private val deepAnalyticQueries = Seq("q34", "q46", "q59", "q65",  "q79", "ss_max").map(queriesMap)
+
+  override lazy val allQueries = interactiveQueries ++ reportingQueries ++ deepAnalyticQueries
 }

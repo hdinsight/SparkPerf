@@ -16,19 +16,31 @@
 
 package com.databricks.spark.sql.perf
 
+import java.io.File
 import java.net.InetAddress
 
-import org.apache.spark.sql.SQLContext
+import org.apache.spark.sql.{SQLContext, SparkSession}
 import org.apache.spark.sql.functions._
-import org.apache.spark.{SparkContext, SparkConf}
-
+import org.apache.spark.{SparkConf, SparkContext}
 import scala.util.Try
+
+import com.databricks.spark.sql.perf.queries.tpcds.Tables
+import com.databricks.spark.sql.perf.queries.{Benchmark, Query}
+import com.databricks.spark.sql.perf.report.ExecutionMode
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.{FileSystem, Path}
 
 case class RunConfig(
     benchmarkName: String = null,
+    databaseName: String = null,
+    databasePath: String = null,
     filter: Option[String] = None,
     iterations: Int = 3,
-    baseline: Option[Long] = None)
+    baseline: Option[Long] = None,
+    executionMode: String = "foreach",
+    outputDir: String = "",
+    s3AccessKey: String = null,
+    s3SecretKey: String = null)
 
 /**
  * Runs a benchmark locally and prints the results to the screen.
@@ -41,6 +53,14 @@ object RunBenchmark {
         .action { (x, c) => c.copy(benchmarkName = x) }
         .text("the name of the benchmark to run")
         .required()
+      opt[String]('d', "database")
+        .action { (x, c) => c.copy(databaseName = x) }
+        .text("the name of database")
+        .required()
+      opt[String]('p', "path")
+        .action { (x, c) => c.copy(databasePath = x) }
+        .text("the path of database path")
+        .required()
       opt[String]('f', "filter")
         .action((x, c) => c.copy(filter = Some(x)))
         .text("a filter on the name of the queries to run")
@@ -50,6 +70,18 @@ object RunBenchmark {
       opt[Long]('c', "compare")
           .action((x, c) => c.copy(baseline = Some(x)))
           .text("the timestamp of the baseline experiment to compare with")
+      opt[String]("s3AccessKey")
+        .action((x, c) => c.copy(s3AccessKey = x))
+        .text("s3 access key")
+      opt[String]("executionMode")
+        .action((x, c) => c.copy(executionMode = x))
+        .text("execution mode of queries")
+      opt[String]("outputDir")
+        .action((x, c) => c.copy(outputDir = x))
+        .text("output directory")
+      opt[String]("s3SecreteKey")
+        .action((x, c) => c.copy(s3SecretKey = x))
+        .text("s3 secrete key")
       help("help")
         .text("prints this usage text")
     }
@@ -62,25 +94,47 @@ object RunBenchmark {
     }
   }
 
+  private def buildTables(config: RunConfig): Unit = {
+    val sparkSession = SparkSession.builder().getOrCreate()
+    val sqlContext = SparkSession.builder().getOrCreate().sqlContext
+    val dummyTablesObj = new Tables(sqlContext, "", 1)
+    dummyTablesObj.tables.foreach(table => {
+      val df = sparkSession.read.parquet(s"${config.databasePath}/${table.name}")
+      println(s"register ${table.name}")
+      df.createOrReplaceTempView(s"${table.name}")
+    })
+  }
+
   def run(config: RunConfig): Unit = {
-    val conf = new SparkConf()
-        .setMaster("local[*]")
-        .setAppName(getClass.getName)
+    val sparkSession = SparkSession
+      .builder()
+      .config("spark.sql.warehouse.dir", config.databasePath)
+      .getOrCreate()
+    import sparkSession.implicits._
 
-    val sc = SparkContext.getOrCreate(conf)
-    val sqlContext = SQLContext.getOrCreate(sc)
-    import sqlContext.implicits._
-
-    sqlContext.setConf("spark.sql.perf.results", new java.io.File("performance").toURI.toString)
-    val benchmark = Try {
-      Class.forName(config.benchmarkName)
-          .newInstance()
-          .asInstanceOf[Benchmark]
-    } getOrElse {
-      Class.forName("com.databricks.spark.sql.perf." + config.benchmarkName)
-          .newInstance()
-          .asInstanceOf[Benchmark]
+    if (config.s3AccessKey != null) {
+      sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.impl",
+        "org.apache.hadoop.fs.s3a.S3AFileSystem")
+      sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.awsAccessKeyId",
+        config.s3AccessKey)
+      sparkSession.sparkContext.hadoopConfiguration.set("fs.s3.awsSecretAccessKey",
+        config.s3SecretKey)
     }
+
+    // sparkSession.sql(s"USE ${config.databaseName}")
+
+    buildTables(config)
+    println("built all tables")
+
+    sparkSession.sqlContext.setConf("spark.sql.perf.results",
+      new java.io.File("performance").toURI.toString)
+    val benchmark = Class.forName(config.benchmarkName).getConstructor(classOf[ExecutionMode]).
+      newInstance({config.executionMode match {
+        case "foreach" => ExecutionMode.ForeachResults
+        case "collect" => ExecutionMode.CollectResults
+        case "parquet" =>
+          ExecutionMode.WriteParquet(config.outputDir)
+      }}).asInstanceOf[Benchmark]
 
     val allQueries = config.filter.map { f =>
       benchmark.allQueries.filter(_.name contains f)
@@ -101,7 +155,7 @@ object RunBenchmark {
     println("== STARTING EXPERIMENT ==")
     experiment.waitForFinish(1000 * 60 * 30)
 
-    sqlContext.setConf("spark.sql.shuffle.partitions", "1")
+    sparkSession.sqlContext.setConf("spark.sql.shuffle.partitions", "1")
     experiment.getCurrentRuns()
         .withColumn("result", explode($"results"))
         .select("result.*")
@@ -112,14 +166,14 @@ object RunBenchmark {
           avg($"executionTime") as 'avgTimeMs,
           stddev($"executionTime") as 'stdDev)
         .orderBy("name")
-        .show(truncate = false)
+        .show(100, truncate = false)
     println(s"""Results: sqlContext.read.json("${experiment.resultPath}")""")
 
     config.baseline.foreach { baseTimestamp =>
       val baselineTime = when($"timestamp" === baseTimestamp, $"executionTime").otherwise(null)
       val thisRunTime = when($"timestamp" === experiment.timestamp, $"executionTime").otherwise(null)
 
-      val data = sqlContext.read.json(benchmark.resultsLocation)
+      val data = sparkSession.read.json(benchmark.resultsLocation)
           .coalesce(1)
           .where(s"timestamp IN ($baseTimestamp, ${experiment.timestamp})")
           .withColumn("result", explode($"results"))
@@ -133,7 +187,7 @@ object RunBenchmark {
             "percentChange", ($"baselineTimeMs" - $"thisRunTimeMs") / $"baselineTimeMs" * 100)
           .filter('thisRunTimeMs.isNotNull)
 
-      data.show(truncate = false)
+      data.show(100, truncate = false)
     }
   }
 }

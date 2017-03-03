@@ -2,7 +2,8 @@ package com.databricks.spark.sql.perf.mllib
 
 import java.util.Random
 
-import com.databricks.spark.sql.perf.{MLParams}
+import com.databricks.spark.sql.perf.report.MLParams
+
 import org.apache.spark.sql.SQLContext
 
 

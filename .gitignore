@@ -19,3 +19,4 @@ src_managed/
 project/boot/
 project/plugins/project/
 performance/
+metastore_db

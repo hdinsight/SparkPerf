@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.databricks.spark.sql.perf
+package com.databricks.spark.sql.perf.report
 
 /**
  * Describes how a given Spark benchmark should be run (i.e. should the results be collected to
