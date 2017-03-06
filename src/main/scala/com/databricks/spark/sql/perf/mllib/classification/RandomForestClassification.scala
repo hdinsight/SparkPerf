@@ -1,11 +1,10 @@
 package com.databricks.spark.sql.perf.mllib.classification
 
-import org.apache.spark.ml.Estimator
-import org.apache.spark.ml.classification.RandomForestClassifier
-
 import com.databricks.spark.sql.perf.mllib._
 import com.databricks.spark.sql.perf.mllib.OptionImplicits._
 
+import org.apache.spark.ml.Estimator
+import org.apache.spark.ml.classification.RandomForestClassifier
 
 object RandomForestClassification extends TreeOrForestClassification {
 

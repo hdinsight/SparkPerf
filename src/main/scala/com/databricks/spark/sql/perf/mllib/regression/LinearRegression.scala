@@ -1,14 +1,13 @@
 package com.databricks.spark.sql.perf.mllib.regression
 
+import com.databricks.spark.sql.perf.mllib._
+import com.databricks.spark.sql.perf.mllib.OptionImplicits._
+import com.databricks.spark.sql.perf.mllib.data.DataGenerator
+
+import org.apache.spark.ml.{Estimator, ModelBuilder, Transformer}
 import org.apache.spark.ml
 import org.apache.spark.ml.evaluation.{Evaluator, RegressionEvaluator}
 import org.apache.spark.ml.linalg.Vectors
-import org.apache.spark.ml.{Estimator, ModelBuilder, Transformer}
-
-import com.databricks.spark.sql.perf.mllib.OptionImplicits._
-import com.databricks.spark.sql.perf.mllib._
-import com.databricks.spark.sql.perf.mllib.data.DataGenerator
-
 
 object LinearRegression extends BenchmarkAlgorithm with TestFromTraining with
   TrainingSetFromTransformer with ScoringWithEvaluator {

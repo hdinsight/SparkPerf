@@ -1,13 +1,13 @@
 package com.databricks.spark.sql.perf.mllib.recommendation
 
-import org.apache.spark.ml
-import org.apache.spark.ml.evaluation.{RegressionEvaluator, Evaluator}
-import org.apache.spark.ml.{Transformer, Estimator}
-import org.apache.spark.sql._
-
+import com.databricks.spark.sql.perf.mllib.{BenchmarkAlgorithm, MLBenchContext, ScoringWithEvaluator}
 import com.databricks.spark.sql.perf.mllib.OptionImplicits._
 import com.databricks.spark.sql.perf.mllib.data.DataGenerator
-import com.databricks.spark.sql.perf.mllib.{ScoringWithEvaluator, BenchmarkAlgorithm, MLBenchContext}
+
+import org.apache.spark.ml
+import org.apache.spark.ml.evaluation.{Evaluator, RegressionEvaluator}
+import org.apache.spark.ml.Estimator
+import org.apache.spark.sql._
 
 object ALS extends BenchmarkAlgorithm with ScoringWithEvaluator {
 

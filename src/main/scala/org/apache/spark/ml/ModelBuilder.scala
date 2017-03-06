@@ -2,7 +2,7 @@ package org.apache.spark.ml
 
 import org.apache.spark.ml.classification.{DecisionTreeClassificationModel, LogisticRegressionModel}
 import org.apache.spark.ml.linalg.Vector
-import org.apache.spark.ml.regression.{LinearRegressionModel, GeneralizedLinearRegressionModel, DecisionTreeRegressionModel}
+import org.apache.spark.ml.regression.{DecisionTreeRegressionModel, GeneralizedLinearRegressionModel, LinearRegressionModel}
 import org.apache.spark.ml.tree._
 import org.apache.spark.mllib.random.RandomDataGenerator
 import org.apache.spark.mllib.tree.impurity.ImpurityCalculator
@@ -67,7 +67,8 @@ object TreeBuilder {
     extends RandomDataGenerator[Pair[Double, Double]] {
 
     require(numClasses >= 2,
-      s"ClassLabelPairGenerator given label numClasses = $numClasses, but numClasses should be >= 2.")
+      s"ClassLabelPairGenerator given label numClasses = $numClasses," +
+        s" but numClasses should be >= 2.")
 
     private val rng = new java.util.Random()
 
@@ -196,7 +197,7 @@ object TreeBuilder {
       // nCatsSplit is in {1,...,arity-1}.
       val nCatsSplit = rng.nextInt(featureArity(feature) - 1) + 1
       val splitCategories: Array[Double] =
-        rng.shuffle(Range(0,featureArity(feature)).toList).toArray.map(_.toDouble).take(nCatsSplit)
+        rng.shuffle(Range(0, featureArity(feature)).toList).toArray.map(_.toDouble).take(nCatsSplit)
       new CategoricalSplit(featureIndex = feature,
         _leftCategories = splitCategories, numCategories = featureArity(feature))
     }

@@ -20,16 +20,18 @@ import scala.sys.process._
 
 import org.slf4j.LoggerFactory
 
+import org.apache.spark.SparkContext
+import org.apache.spark.sql.{Row, SaveMode, SQLContext}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.{Row, SQLContext, SaveMode}
 
 class Tables(sqlContext: SQLContext, dsdgenDir: String, scaleFactor: Int) extends Serializable {
   import sqlContext.implicits._
 
   private val log = LoggerFactory.getLogger(getClass)
 
-  def sparkContext = sqlContext.sparkContext
+  def sparkContext: SparkContext = sqlContext.sparkContext
+
   val dsdgen = s"$dsdgenDir/dsdgen"
 
   case class Table(name: String, partitionColumns: Seq[String], fields: StructField*) {
@@ -39,11 +41,11 @@ class Tables(sqlContext: SQLContext, dsdgenDir: String, scaleFactor: Int) extend
       Table(name, Nil, fields : _*)
     }
 
-    /** 
+    /**
      *  If convertToSchema is true, the data from generator will be parsed into columns and
      *  converted to `schema`. Otherwise, it just outputs the raw data (as a single STRING column).
      */
-    def df(convertToSchema: Boolean, numPartition: Int) = {
+    private def df(convertToSchema: Boolean, numPartition: Int) = {
       val partitions = if (partitionColumns.isEmpty) 1 else numPartition
       val generatedData = {
         sparkContext.parallelize(1 to partitions, partitions).flatMap { i =>
@@ -55,11 +57,13 @@ class Tables(sqlContext: SQLContext, dsdgenDir: String, scaleFactor: Int) extend
             sys.error(s"Could not find dsdgen at $dsdgen or /$dsdgen. Run install")
           }
 
-          // Note: RNGSEED is the RNG seed used by the data generator. Right now, it is fixed to 100.
+          // Note: RNGSEED is the RNG seed used by the data generator. Right now, it is fixed to
+          // 100.
           val parallel = if (partitions > 1) s"-parallel $partitions -child $i" else ""
           val commands = Seq(
             "bash", "-c",
-            s"cd $localToolsDir && ./dsdgen -table $name -filter Y -scale $scaleFactor -RNGSEED 100 $parallel")
+            s"cd $localToolsDir && ./dsdgen -table $name -filter Y -scale $scaleFactor" +
+              s" -RNGSEED 100 $parallel")
           println(commands)
           commands.lines
         }
@@ -113,7 +117,7 @@ class Tables(sqlContext: SQLContext, dsdgenDir: String, scaleFactor: Int) extend
         field.copy(dataType = newDataType)
       }
 
-      Table(name, partitionColumns, newFields:_*)
+      Table(name, partitionColumns, newFields: _*)
     }
 
     def genData(
@@ -172,7 +176,9 @@ class Tables(sqlContext: SQLContext, dsdgenDir: String, scaleFactor: Int) extend
       sqlContext.dropTempTable(tempTableName)
     }
 
-    def createExternalTable(location: String, format: String, databaseName: String, overwrite: Boolean): Unit = {
+    def createExternalTable(
+        location: String, format: String, databaseName: String,
+        overwrite: Boolean): Unit = {
       val qualifiedTableName = databaseName + "." + name
       val tableExists = sqlContext.tableNames(databaseName).contains(name)
       if (overwrite) {
@@ -180,8 +186,8 @@ class Tables(sqlContext: SQLContext, dsdgenDir: String, scaleFactor: Int) extend
       }
 
       if (!tableExists || overwrite) {
-        println(s"Creating external table $name in database $databaseName using data stored in $location.")
-        log.info(s"Creating external table $name in database $databaseName using data stored in $location.")
+        log.info(s"Creating external table $name in database $databaseName using" +
+          s" data stored in $location.")
         sqlContext.createExternalTable(qualifiedTableName, location, format)
       }
     }
@@ -264,6 +270,7 @@ class Tables(sqlContext: SQLContext, dsdgenDir: String, scaleFactor: Int) extend
   }
 
   val tables = Seq(
+    // scalastyle:off
     Table("catalog_sales",
       partitionColumns = "cs_sold_date_sk" :: Nil,
       'cs_sold_date_sk          .int,
@@ -737,6 +744,7 @@ class Tables(sqlContext: SQLContext, dsdgenDir: String, scaleFactor: Int) extend
       'web_country              .string,
       'web_gmt_offset           .string,
       'web_tax_percentage       .decimal(5,2))
+    // scalastyle:on
   )
 }
 

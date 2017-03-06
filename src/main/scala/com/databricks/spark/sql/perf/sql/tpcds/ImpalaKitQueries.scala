@@ -18,12 +18,14 @@ package com.databricks.spark.sql.perf.sql.tpcds
 
 import com.databricks.spark.sql.perf.report.ExecutionMode
 
-class ImpalaKitQueries(executionMode: ExecutionMode = ExecutionMode.ForeachResults) extends Benchmark {
+class ImpalaKitQueries(executionMode: ExecutionMode = ExecutionMode.ForeachResults)
+  extends Benchmark {
 
   import ExecutionMode._
 
   // Queries are from
   // https://github.com/cloudera/impala-tpcds-kit/tree/master/queries-sql92-modified/queries
+  // scalastyle:off
   val queries = Seq(
     ("q19",
       """
@@ -1496,6 +1498,7 @@ class ImpalaKitQueries(executionMode: ExecutionMode = ExecutionMode.ForeachResul
         |  max(ss_promo_sk) as max_ss_promo_sk
         |from store_sales
       """.stripMargin)
+    // scalastyle:on
   ).map { case (name, sqlText) =>
     Query(name, sqlText, description = "original query", executionMode = {
       executionMode match {
@@ -1508,8 +1511,8 @@ class ImpalaKitQueries(executionMode: ExecutionMode = ExecutionMode.ForeachResul
 
   private val interactiveQueries =
     Seq("q19", "q42", "q52", "q55", "q63", "q68", "q73", "q98").map(queriesMap)
-  private val reportingQueries = Seq("q3","q7", "q27","q43", "q53", "q89").map(queriesMap)
-  private val deepAnalyticQueries = Seq("q34", "q46", "q59", "q65",  "q79", "ss_max").map(queriesMap)
+  private val reportingQueries = Seq("q3", "q7", "q27", "q43", "q53", "q89").map(queriesMap)
+  private val deepAnalyticQueries = Seq("q34", "q46", "q59", "q65", "q79", "ss_max").map(queriesMap)
 
   override lazy val allQueries = interactiveQueries ++ reportingQueries ++ deepAnalyticQueries
 }

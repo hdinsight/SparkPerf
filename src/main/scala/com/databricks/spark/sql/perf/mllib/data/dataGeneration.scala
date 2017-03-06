@@ -1,12 +1,11 @@
 package com.databricks.spark.sql.perf.mllib.data
 
-import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.ml.linalg.Vector
+import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.ml.recommendation.ALS.Rating
 import org.apache.spark.mllib.random._
 import org.apache.spark.rdd.{PairRDDFunctions, RDD}
-import org.apache.spark.sql.{SQLContext, DataFrame}
-
+import org.apache.spark.sql.{DataFrame, SQLContext}
 
 object DataGenerator {
 
@@ -76,7 +75,7 @@ object DataGenerator {
 
     // Now get rid of duplicate ratings and remove non-existant userID's
     // and prodID's from the test set
-    val commons: PairRDDFunctions[(Int,Int),Rating[Int]] =
+    val commons: PairRDDFunctions[(Int, Int), Rating[Int]] =
       new PairRDDFunctions(train.keyBy(rating => (rating.user, rating.item)).cache())
 
     val exact = commons.join(test.keyBy(rating => (rating.user, rating.item)))
@@ -84,15 +83,15 @@ object DataGenerator {
     val trainPruned = commons.subtractByKey(exact).map(_._2).cache()
 
     // Now get rid of users that don't exist in the train set
-    val trainUsers: RDD[(Int,Rating[Int])] = trainPruned.keyBy(rating => rating.user)
-    val testUsers: PairRDDFunctions[Int,Rating[Int]] =
+    val trainUsers: RDD[(Int, Rating[Int])] = trainPruned.keyBy(rating => rating.user)
+    val testUsers: PairRDDFunctions[Int, Rating[Int]] =
       new PairRDDFunctions(test.keyBy(rating => rating.user))
     val testWithAdditionalUsers = testUsers.subtractByKey(trainUsers)
 
-    val userPrunedTestProds: RDD[(Int,Rating[Int])] =
+    val userPrunedTestProds: RDD[(Int, Rating[Int])] =
       testUsers.subtractByKey(testWithAdditionalUsers).map(_._2).keyBy(rating => rating.item)
 
-    val trainProds: RDD[(Int,Rating[Int])] = trainPruned.keyBy(rating => rating.item)
+    val trainProds: RDD[(Int, Rating[Int])] = trainPruned.keyBy(rating => rating.item)
 
     val testWithAdditionalProds =
       new PairRDDFunctions[Int, Rating[Int]](userPrunedTestProds).subtractByKey(trainProds)
@@ -131,10 +130,11 @@ class FeaturesGenerator(val featureArity: Array[Int])
     val arr = new Array[Double](numFeatures)
     var j = 0
     while (j < featureArity.length) {
-      if (featureArity(j) == 0)
+      if (featureArity(j) == 0) {
         arr(j) = 2 * rng.nextDouble() - 1 // centered uniform data
-      else
+      } else {
         arr(j) = rng.nextInt(featureArity(j))
+      }
       j += 1
     }
     Vectors.dense(arr)

@@ -16,10 +16,9 @@
 
 package com.databricks.spark.sql.perf.report
 
-import org.apache.spark.sql.SQLContext
+import org.apache.spark.sql.{DataFrame, SQLContext}
 
 case class Results(resultsLocation: String, @transient sqlContext: SQLContext) {
-  def allResults =
-    sqlContext.read.json(
-      sqlContext.sparkContext.textFile(s"$resultsLocation/*/"))
+  def allResults: DataFrame =
+    sqlContext.read.json(sqlContext.sparkContext.textFile(s"$resultsLocation/*/"))
 }

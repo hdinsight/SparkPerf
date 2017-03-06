@@ -16,18 +16,13 @@
 
 package com.databricks.spark.sql.perf
 
-import java.io.File
 import java.net.InetAddress
 
-import org.apache.spark.sql.{SQLContext, SparkSession}
-import org.apache.spark.sql.functions._
-import org.apache.spark.{SparkConf, SparkContext}
-import scala.util.Try
-
-import com.databricks.spark.sql.perf.sql.tpcds.{Benchmark, Tables}
 import com.databricks.spark.sql.perf.report.ExecutionMode
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{FileSystem, Path}
+import com.databricks.spark.sql.perf.sql.tpcds.{Benchmark, Tables}
+
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions._
 
 case class RunConfig(
     benchmarkName: String = null,
@@ -170,7 +165,8 @@ object RunBenchmark {
 
     config.baseline.foreach { baseTimestamp =>
       val baselineTime = when($"timestamp" === baseTimestamp, $"executionTime").otherwise(null)
-      val thisRunTime = when($"timestamp" === experiment.timestamp, $"executionTime").otherwise(null)
+      val thisRunTime = when($"timestamp" === experiment.timestamp, $"executionTime").
+        otherwise(null)
 
       val data = sparkSession.read.json(benchmark.resultsLocation)
           .coalesce(1)

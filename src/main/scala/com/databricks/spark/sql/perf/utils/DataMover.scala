@@ -22,7 +22,7 @@ object DataMover {
     val tables = dummyTableObj.tables
     for (table <- tables) {
       val df = sparkSession.read.parquet(srcPath + "/" + table.name)
-      df.write.partitionBy(table.partitionColumns :_*).parquet(dstPath + "/" + table.name)
+      df.write.partitionBy(table.partitionColumns : _*).parquet(dstPath + "/" + table.name)
     }
   }
 }

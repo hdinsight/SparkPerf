@@ -1,9 +1,9 @@
 package com.databricks.spark.sql.perf.mllib.data
 
+import scala.collection.mutable
+
 import org.apache.spark.ml.recommendation.ALS.Rating
 import org.apache.spark.mllib.random.RandomDataGenerator
-
-import scala.collection.mutable
 
 class RatingGenerator(
     private val numUsers: Int,
@@ -15,9 +15,9 @@ class RatingGenerator(
   private val observed = new mutable.HashMap[(Int, Int), Boolean]()
 
   override def nextValue(): Rating[Int] = {
-    var tuple = (rng.nextInt(numUsers),rng.nextInt(numProducts))
-    while (observed.getOrElse(tuple,false)){
-      tuple = (rng.nextInt(numUsers),rng.nextInt(numProducts))
+    var tuple = (rng.nextInt(numUsers), rng.nextInt(numProducts))
+    while (observed.getOrElse(tuple, false)) {
+      tuple = (rng.nextInt(numUsers), rng.nextInt(numProducts))
     }
     observed += (tuple -> true)
 

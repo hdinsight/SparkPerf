@@ -16,6 +16,7 @@
 
 package com.databricks.spark.sql.perf.sql.tpcds
 
+import com.databricks.spark.sql.perf.Benchmarkable
 import com.databricks.spark.sql.perf.report.ExecutionMode
 
 import org.apache.spark.sql.Encoder
@@ -37,7 +38,8 @@ class DatasetPerformance extends Benchmark {
   val smallds = sqlContext.range(1, smallNumLongs)
   val smallrdd = sparkContext.range(1, smallNumLongs)
 
-  def allBenchmarks =  range ++ backToBackFilters ++ backToBackMaps ++ computeAverage
+  def allBenchmarks: Seq[Benchmarkable] =
+    range ++ backToBackFilters ++ backToBackMaps ++ computeAverage
 
   val range = Seq(
     new Query(

@@ -18,7 +18,7 @@ case class MLBenchContext(
     sqlContext: SQLContext) {
 
   // Some seed fixed for the context.
-  private val internalSeed: Long  = {
+  private val internalSeed = {
     params.randomSeed.map(_.toLong).getOrElse {
       throw new Exception("You need te specify the random seed")
     }

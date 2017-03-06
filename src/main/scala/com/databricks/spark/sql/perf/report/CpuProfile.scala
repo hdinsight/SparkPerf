@@ -24,20 +24,22 @@ import scala.sys.process._
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 
-import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Row, SQLContext}
+import org.apache.spark.sql.functions._
 
 /**
- * A collection of utilities for parsing stacktraces that have been recorded in JSON and generating visualizations
- * on where time is being spent.
+ * A collection of utilities for parsing stacktraces that have been recorded in
+ * JSON and generating visualizations on where time is being spent.
  */
 package object cpu {
 
+  // scalastyle:off
   // Placeholder for DBFS.
   type FS = {
     def cp(from: String, to: String, recurse: Boolean): Boolean
     def rm(dir: String, recurse: Boolean): Boolean
   }
+  // scalastyle:on
 
   private val resultsLocation = "/spark/sql/cpu"
 
@@ -50,7 +52,7 @@ package object cpu {
     "./pprof"
   }
 
-  def getCpuLocation(timestamp: Long) = s"$resultsLocation/timestamp=$timestamp"
+  def getCpuLocation(timestamp: Long): String = s"$resultsLocation/timestamp=$timestamp"
 
   def collectLogs(sqlContext: SQLContext, fs: FS, timestamp: Long): String = {
 
@@ -62,7 +64,8 @@ package object cpu {
 
       val conf = new Configuration()
       val fs = FileSystem.get(conf)
-      fs.copyFromLocalFile(new Path(s"$path/logs/cpu.json"), new Path(s"$resultsLocation/timestamp=$timestamp/$hostname"))
+      fs.copyFromLocalFile(new Path(s"$path/logs/cpu.json"),
+        new Path(s"$resultsLocation/timestamp=$timestamp/$hostname"))
     }
 
     fs.rm(getCpuLocation(timestamp), true)
@@ -72,7 +75,7 @@ package object cpu {
     getCpuLocation(timestamp)
   }
 
-  def run(cmds: String*) = {
+  def run(cmds: String*): (Int, String) = {
     val output = new StringBuilder
 
     def append(line: String): Unit = output.synchronized {
@@ -82,29 +85,32 @@ package object cpu {
     }
 
     val processLogger = ProcessLogger(append, append)
-
     val exitCode = Seq("/bin/bash", "-c", cmds.mkString(" && ")) ! processLogger
-
     (exitCode, output.toString())
   }
 
   class Profile(private val sqlContext: SQLContext, cpuLogs: DataFrame) {
     import sqlContext.implicits._
 
-    def hosts = cpuLogs.select($"tags.hostName").distinct.collect().map(_.getString(0))
+    def hosts: Seq[String] = {
+      cpuLogs.select($"tags.hostName").distinct.collect().map(_.getString(0))
+    }
 
-    def buildGraph(fs: FS) = {
+    def buildGraph(fs: FS): String = {
       val stackLine = """(.*)\.([^\(]+)\(([^:]+)(:{0,1}\d*)\)""".r
       def toStackElement(s: String) = s match {
         case stackLine(cls, method, file, "") => new StackTraceElement(cls, method, file, 0)
-        case stackLine(cls, method, file, line) => new StackTraceElement(cls, method, file, line.stripPrefix(":").toInt)
+        case stackLine(cls, method, file, line) => new StackTraceElement(cls, method, file,
+          line.stripPrefix(":").toInt)
       }
 
       val counts = cpuLogs.groupBy($"stack").agg(count($"*")).collect().flatMap {
-        case Row(stackLines: Seq[String], count: Long) => stackLines.map(toStackElement) -> count :: Nil
+        case Row(stackLines: Seq[String], count: Long) =>
+          stackLines.map(toStackElement) -> count :: Nil
         case other => println(s"Failed to parse $other"); Nil
       }.toMap
-      val profile = new com.twitter.jvm.CpuProfile(counts, com.twitter.util.Duration.fromSeconds(10), cpuLogs.count().toInt, 0)
+      val profile = new com.twitter.jvm.CpuProfile(counts,
+        com.twitter.util.Duration.fromSeconds(10), cpuLogs.count().toInt, 0)
 
       val outfile = File.createTempFile("cpu", "profile")
       val svgFile = File.createTempFile("cpu", "svg")
@@ -118,7 +124,8 @@ package object cpu {
 
       val timestamp = System.currentTimeMillis()
       fs.cp(s"file://$svgFile", s"/FileStore/cpu.profiles/$timestamp.svg", false)
-      s"""<a href="https://dogfood.staging.cloud.databricks.com/files/cpu.profiles/$timestamp.svg"/>CPU Usage Visualization</a>"""
+      s"""<a href="https://dogfood.staging.cloud.databricks.com/files/cpu.profiles
+         |/$timestamp.svg"/>CPU Usage Visualization</a>""".stripMargin
     }
   }
 }

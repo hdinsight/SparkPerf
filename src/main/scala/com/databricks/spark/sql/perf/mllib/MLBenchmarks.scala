@@ -1,11 +1,11 @@
 package com.databricks.spark.sql.perf.mllib
 
 import com.databricks.spark.sql.perf.mllib.classification.LogisticRegression
+import com.databricks.spark.sql.perf.report.MLParams
+import OptionImplicits._
 
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SQLContext
-import OptionImplicits._
-import com.databricks.spark.sql.perf.report.MLParams
 
 case class MLTest(
                    benchmark: BenchmarkAlgorithm,

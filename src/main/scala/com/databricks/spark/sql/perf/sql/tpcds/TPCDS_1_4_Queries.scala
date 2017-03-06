@@ -32,6 +32,7 @@ class Tpcds_1_4_Queries(executionMode: ExecutionMode)
   // RC=ulist(random(1, rowcount("store_sales")/5,uniform),5);
   val rc = Array(1000000, 1000000, 1000000, 1000000, 1000000)
 
+  // scalastyle:off
   // Queries the TPCDS 1.4 queries using the qualifcations values in the templates.
   val tpcds1_4Queries = Seq(
     ("q1", """
@@ -3859,6 +3860,7 @@ class Tpcds_1_4_Queries(executionMode: ExecutionMode)
           |  max(ss_promo_sk) as max_ss_promo_sk
           |from store_sales
         """.stripMargin)
+    // scalastyle:on
   ).map { case (name, sqlText) =>
     Query(name + "-v1.4", sqlText, description = "TPCDS 1.4 Query", executionMode = {
       executionMode match {

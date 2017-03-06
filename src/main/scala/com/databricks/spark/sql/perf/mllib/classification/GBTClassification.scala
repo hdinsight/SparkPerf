@@ -1,14 +1,13 @@
 package com.databricks.spark.sql.perf.mllib.classification
 
-import org.apache.spark.ml.{Estimator, ModelBuilder, Transformer, TreeUtils}
-import org.apache.spark.ml.classification.GBTClassifier
-import org.apache.spark.ml.evaluation.{Evaluator, MulticlassClassificationEvaluator}
-import org.apache.spark.sql._
-
 import com.databricks.spark.sql.perf.mllib._
 import com.databricks.spark.sql.perf.mllib.OptionImplicits._
 import com.databricks.spark.sql.perf.mllib.data.DataGenerator
 
+import org.apache.spark.ml.{Estimator, ModelBuilder, Transformer, TreeUtils}
+import org.apache.spark.ml.classification.GBTClassifier
+import org.apache.spark.ml.evaluation.{Evaluator, MulticlassClassificationEvaluator}
+import org.apache.spark.sql._
 
 object GBTClassification extends BenchmarkAlgorithm
   with TestFromTraining with TrainingSetFromTransformer with ScoringWithEvaluator {

@@ -1,14 +1,13 @@
 package com.databricks.spark.sql.perf.mllib.classification
 
+import com.databricks.spark.sql.perf.mllib._
+import com.databricks.spark.sql.perf.mllib.OptionImplicits._
+import com.databricks.spark.sql.perf.mllib.data.DataGenerator
+
 import org.apache.spark.ml.{Estimator, ModelBuilder, Transformer, TreeUtils}
 import org.apache.spark.ml.classification.DecisionTreeClassifier
 import org.apache.spark.ml.evaluation.{Evaluator, MulticlassClassificationEvaluator}
 import org.apache.spark.sql.DataFrame
-
-import com.databricks.spark.sql.perf.mllib.OptionImplicits._
-import com.databricks.spark.sql.perf.mllib._
-import com.databricks.spark.sql.perf.mllib.data.DataGenerator
-
 
 abstract class TreeOrForestClassification extends BenchmarkAlgorithm
   with TestFromTraining with TrainingSetFromTransformer with ScoringWithEvaluator {

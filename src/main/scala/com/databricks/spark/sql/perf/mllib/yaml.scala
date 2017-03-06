@@ -2,8 +2,8 @@ package com.databricks.spark.sql.perf.mllib
 
 import java.util.{ArrayList => AL}
 
-import scala.concurrent.duration._
 import scala.collection.JavaConverters._
+import scala.concurrent.duration._
 import scala.io.Source
 import scala.reflect._
 import scala.reflect.runtime.universe._
@@ -11,7 +11,6 @@ import scala.util.{Failure, Success, Try => STry}
 
 import com.databricks.spark.sql.perf.report.MLParams
 import org.yaml.snakeyaml.Yaml
-
 
 /**
  * The configuration information generated from reading a YAML file.
@@ -48,7 +47,7 @@ object YamlConfig {
     println("exp parsed")
     println(experiments)
     val e2 = experiments.map { case (n, e) =>
-      val e2 = ccFromMap.fromMap[MLParams](e, strict=true)
+      val e2 = ccFromMap.fromMap[MLParams](e, strict = true)
       val s = ccFromMap.loadExperiment(n).getOrElse {
         throw new Exception(s"Cannot find algorithm $n in the standard benchmark algorithms")
       }
@@ -110,10 +109,9 @@ object YamlConfig {
 
 // Some ugly internals to make simple constructs
 object ccFromMap {
-  // Builds a case class from a map.
-  // (taken from stack overflow)
-  // if strict, will report an error if some unknown arguments are passed to the constructor
-  def fromMap[T: TypeTag: ClassTag](m: Map[String,_], strict: Boolean) = {
+  // Builds a case class from a map. (taken from stack overflow) if strict, will report an error if
+  // some unknown arguments are passed to the constructor
+  private[mllib] def fromMap[T: TypeTag: ClassTag](m: Map[String, _], strict: Boolean) = {
     scala.reflect.runtime.universe
     val rm = runtimeMirror(classTag[T].runtimeClass.getClassLoader)
     val classTest = typeOf[T].typeSymbol.asClass
@@ -129,19 +127,22 @@ object ccFromMap {
         s" ${extraElements.toSeq.sorted}")
     }
 
-    val constructorArgs = constructor.paramss.flatten.map( (param: Symbol) => {
+    val constructorArgs = constructor.paramss.flatten.map((param: Symbol) => {
       val paramName = param.name.toString
-      if(param.typeSignature <:< typeOf[Option[Long]])
+      if (param.typeSignature <:< typeOf[Option[Long]]) {
         OptionImplicits.checkLong(m.get(paramName).asInstanceOf[Option[Long]])
-      else if(param.typeSignature <:< typeOf[Option[Double]])
+      } else if (param.typeSignature <:< typeOf[Option[Double]]) {
         OptionImplicits.checkDouble(m.get(paramName).asInstanceOf[Option[Double]])
-      else if(param.typeSignature <:< typeOf[Option[Any]])
+      } else if (param.typeSignature <:< typeOf[Option[Any]]) {
         m.get(paramName)
-      else
-        m.get(paramName).getOrElse(throw new IllegalArgumentException("Map is missing required parameter named " + paramName))
+      } else {
+        m.getOrElse(paramName,
+          throw new IllegalArgumentException("Map is missing required parameter named " + paramName)
+        )
+      }
     })
 
-    val res = constructorMirror(constructorArgs:_*).asInstanceOf[T]
+    val res = constructorMirror(constructorArgs: _*).asInstanceOf[T]
     res
   }
 

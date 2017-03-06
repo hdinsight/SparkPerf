@@ -2,16 +2,15 @@ package com.databricks.spark.sql.perf.mllib.clustering
 
 import scala.collection.mutable.{HashMap => MHashMap}
 
-import org.apache.commons.math3.random.Well19937c
-
-import org.apache.spark.ml.Estimator
-import org.apache.spark.ml
-import org.apache.spark.rdd.RDD
-import org.apache.spark.sql._
-import org.apache.spark.ml.linalg.{Vector, Vectors}
-
 import com.databricks.spark.sql.perf.mllib.{BenchmarkAlgorithm, MLBenchContext, TestFromTraining}
 import com.databricks.spark.sql.perf.mllib.OptionImplicits._
+import org.apache.commons.math3.random.Well19937c
+
+import org.apache.spark.ml
+import org.apache.spark.ml.linalg.{Vector, Vectors}
+import org.apache.spark.ml.Estimator
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql._
 
 
 object LDA extends BenchmarkAlgorithm with TestFromTraining {

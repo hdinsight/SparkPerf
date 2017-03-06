@@ -23,10 +23,9 @@ import scala.language.implicitConversions
 import com.databricks.spark.sql.perf.Benchmarkable
 import com.databricks.spark.sql.perf.report.{BenchmarkResult, BreakdownResult, ExecutionMode, Failure}
 
+import org.apache.spark.sql.{DataFrame, SaveMode}
 import org.apache.spark.sql.catalyst.analysis.UnresolvedRelation
 import org.apache.spark.sql.execution.SparkPlan
-import org.apache.spark.sql.{DataFrame, SaveMode}
-
 
 /** Holds one benchmark query and its metadata. */
 class Query(
@@ -56,14 +55,13 @@ class Query(
     }
   }
 
-  lazy val tablesInvolved = buildDataFrame.queryExecution.logical collect {
-    case UnresolvedRelation(tableIdentifier, _) => {
+  lazy val tablesInvolved = buildDataFrame.queryExecution.logical.collect {
+    case UnresolvedRelation(tableIdentifier, _) =>
       // We are ignoring the database name.
       tableIdentifier.table
-    }
   }
 
-  def newDataFrame() = buildDataFrame
+  def newDataFrame(): DataFrame = buildDataFrame
 
   protected override def doBenchmark(
       includeBreakdown: Boolean,
@@ -168,7 +166,10 @@ class Query(
     }
   }
 
-  /** Change the ExecutionMode of this Query to HashResults, which is used to check the query result. */
+  /**
+   *  Change the ExecutionMode of this Query to HashResults, which is used to check the
+   *  query result.
+   */
   def checkResult: Query = {
     new Query(name, buildDataFrame, description, sqlText, ExecutionMode.HashResults)
   }

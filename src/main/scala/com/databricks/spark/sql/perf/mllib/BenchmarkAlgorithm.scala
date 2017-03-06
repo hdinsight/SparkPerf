@@ -2,8 +2,8 @@ package com.databricks.spark.sql.perf.mllib
 
 import com.typesafe.scalalogging.slf4j.{LazyLogging => Logging}
 
-import org.apache.spark.ml.attribute.{NominalAttribute, NumericAttribute}
 import org.apache.spark.ml.{Estimator, Transformer}
+import org.apache.spark.ml.attribute.{NominalAttribute, NumericAttribute}
 import org.apache.spark.ml.evaluation.Evaluator
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._

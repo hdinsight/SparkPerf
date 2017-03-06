@@ -17,20 +17,20 @@
 package com.databricks.spark.sql.perf.sql.tpcds
 
 import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.language.implicitConversions
-import scala.util.{Success, Try, Failure => SFailure}
+import scala.util.{Failure => SFailure, Success, Try}
 
+import com.databricks.spark.sql.perf.{cpu, Benchmarkable}
 import com.databricks.spark.sql.perf.cpu._
 import com.databricks.spark.sql.perf.report._
-import com.databricks.spark.sql.perf.{Benchmarkable, cpu}
 
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.catalyst.analysis.UnresolvedRelation
 import org.apache.spark.sql.{DataFrame, Dataset, SQLContext}
+import org.apache.spark.sql.catalyst.analysis.UnresolvedRelation
 
 /**
  * A collection of queries that test a particular aspect of Spark SQL.
@@ -62,7 +62,7 @@ abstract class Benchmark(
         .toMap
   }.getOrElse(Map.empty)
 
-  def currentConfiguration = BenchmarkConfiguration(
+  private def currentConfiguration = BenchmarkConfiguration(
     sqlConf = sqlContext.getAllConfs,
     sparkConf = sparkContext.getConf.getAll.toMap,
     defaultParallelism = sparkContext.defaultParallelism,
@@ -107,7 +107,7 @@ abstract class Benchmark(
       tags: Map[String, String] = Map.empty,
       timeout: Long = 0L,
       resultLocation: String = resultsLocation,
-      forkThread: Boolean = true) = {
+      forkThread: Boolean = true): ExperimentStatus = {
 
     new ExperimentStatus(executionsToRun, includeBreakdown, iterations, variations, tags,
       timeout, resultLocation, sqlContext, allTables, currentConfiguration, forkThread = forkThread)
@@ -123,36 +123,39 @@ abstract class Benchmark(
   @transient
   val myType = runtimeMirror.classSymbol(getClass).toType
 
-  def singleTables =
+  private def singleTables =
     myType.declarations
       .filter(m => m.isMethod)
       .map(_.asMethod)
       .filter(_.asMethod.returnType =:= typeOf[Table])
       .map(method => runtimeMirror.reflect(this).reflectMethod(method).apply().asInstanceOf[Table])
 
-  def groupedTables =
+  private def groupedTables =
     myType.declarations
       .filter(m => m.isMethod)
       .map(_.asMethod)
       .filter(_.asMethod.returnType =:= typeOf[Seq[Table]])
-      .flatMap(method => runtimeMirror.reflect(this).reflectMethod(method).apply().asInstanceOf[Seq[Table]])
+      .flatMap(method => runtimeMirror.reflect(this).reflectMethod(method).apply()
+      .asInstanceOf[Seq[Table]])
 
   @transient
   lazy val allTables: Seq[Table] = (singleTables ++ groupedTables).toSeq
 
-  def singleQueries =
+  private def singleQueries =
     myType.declarations
       .filter(m => m.isMethod)
       .map(_.asMethod)
       .filter(_.asMethod.returnType =:= typeOf[Benchmarkable])
-      .map(method => runtimeMirror.reflect(this).reflectMethod(method).apply().asInstanceOf[Benchmarkable])
+      .map(method => runtimeMirror.reflect(this).reflectMethod(method).apply().
+        asInstanceOf[Benchmarkable])
 
-  def groupedQueries =
+  private def groupedQueries =
     myType.declarations
       .filter(m => m.isMethod)
       .map(_.asMethod)
       .filter(_.asMethod.returnType =:= typeOf[Seq[Benchmarkable]])
-      .flatMap(method => runtimeMirror.reflect(this).reflectMethod(method).apply().asInstanceOf[Seq[Benchmarkable]])
+      .flatMap(method => runtimeMirror.reflect(this).reflectMethod(method).apply().
+        asInstanceOf[Seq[Benchmarkable]])
 
   @transient
   lazy val allQueries = (singleQueries ++ groupedQueries).toSeq
@@ -163,7 +166,8 @@ abstract class Benchmark(
         .filter(m => m.isMethod)
         .map(_.asMethod)
         .filter(_.asMethod.returnType =:= typeOf[Query])
-        .map(method => runtimeMirror.reflect(this).reflectMethod(method).apply().asInstanceOf[Query])
+        .map(method => runtimeMirror.reflect(this).reflectMethod(method).apply().
+          asInstanceOf[Query])
         .mkString(",")
     val queries =
       myType.declarations
@@ -171,7 +175,8 @@ abstract class Benchmark(
       .map(_.asMethod)
       .filter(_.asMethod.returnType =:= typeOf[Seq[Query]])
       .map { method =>
-        val queries = runtimeMirror.reflect(this).reflectMethod(method).apply().asInstanceOf[Seq[Query]]
+        val queries = runtimeMirror.reflect(this).reflectMethod(method).apply().
+          asInstanceOf[Seq[Query]]
         val queryList = queries.map(_.name).mkString(", ")
         s"""
           |<h3>${method.name}</h3>
@@ -206,15 +211,8 @@ abstract class Benchmark(
   }
 
   object RDDCount {
-    def apply(
-        name: String,
-        rdd: RDD[_]) = {
-      new SparkPerfExecution(
-        name,
-        Map.empty,
-        () => Unit,
-        () => rdd.count(),
-        rdd.toDebugString)
+    def apply(name: String, rdd: RDD[_]): SparkPerfExecution = {
+      new SparkPerfExecution(name, Map.empty, () => Unit, () => rdd.count(), rdd.toDebugString)
     }
   }
 
@@ -303,8 +301,7 @@ object Benchmark {
     val currentRuns = new collection.mutable.ArrayBuffer[ExperimentRun]()
     val currentMessages = new collection.mutable.ArrayBuffer[String]()
 
-    def logMessage(msg: String) = {
-      println(msg)
+    private def logMessage(msg: String) = {
       currentMessages += msg
     }
 
@@ -321,7 +318,7 @@ object Benchmark {
 
     def cartesianProduct[T](xss: List[List[T]]): List[List[T]] = xss match {
       case Nil => List(Nil)
-      case h :: t => for(xh <- h; xt <- cartesianProduct(t)) yield xh :: xt
+      case h :: t => for (xh <- h; xt <- cartesianProduct(t)) yield xh :: xt
     }
 
     val timestamp = System.currentTimeMillis()
@@ -372,10 +369,11 @@ object Benchmark {
               v.setup(v.options(idx))
               v.name -> v.options(idx).toString
           }
-          currentConfig = currentOptions.map { case (k,v) => s"$k: $v" }.mkString(", ")
+          currentConfig = currentOptions.map{case (k, v) => s"$k: $v" }.mkString(", ")
 
           val res = executionsToRun.flatMap { q =>
-            val setup = s"iteration: $i, ${currentOptions.map { case (k, v) => s"$k=$v"}.mkString(", ")}"
+            val setup = s"iteration: $i, ${currentOptions.map { case (k, v) => s"$k=$v"}.
+              mkString(", ")}"
             logMessage(s"Running execution ${q.name} $setup")
 
             currentExecution = q.name
@@ -393,7 +391,7 @@ object Benchmark {
 
             val singleResultT = Try {
               q.benchmark(includeBreakdown, setup, currentMessages, timeout,
-                forkThread=forkThread)
+                forkThread = forkThread)
             }
 
             singleResultT match {
@@ -442,7 +440,7 @@ object Benchmark {
       logCollection()
     }
 
-    def scheduleCpuCollection(fs: FS) = {
+    def scheduleCpuCollection(fs: FS): Unit = {
       logCollection = () => {
         logMessage(s"Begining CPU log collection")
         try {
@@ -456,9 +454,11 @@ object Benchmark {
       }
     }
 
-    def cpuProfile = new Profile(sqlContext, sqlContext.read.json(getCpuLocation(timestamp)))
+    def cpuProfile: Profile = {
+      new Profile(sqlContext, sqlContext.read.json(getCpuLocation(timestamp)))
+    }
 
-    def cpuProfileHtml(fs: FS) = {
+    def cpuProfileHtml(fs: FS): String = {
       s"""
          |<h1>CPU Profile</h1>
          |<b>Permalink:</b> <tt>sqlContext.read.json("${getCpuLocation(timestamp)}")</tt></br>
@@ -466,41 +466,45 @@ object Benchmark {
          """.stripMargin
     }
 
-    /** Waits for the finish of the experiment. */
-    def waitForFinish(timeoutInSeconds: Int) = {
+    /**
+     * Waits for the finish of the experiment.
+     */
+    def waitForFinish(timeoutInSeconds: Int): Unit = {
       Await.result(resultsFuture, timeoutInSeconds.seconds)
     }
 
     /** Returns results from an actively running experiment. */
-    def getCurrentResults() = {
+    def getCurrentResults(): DataFrame = {
       val tbl = sqlContext.createDataFrame(currentResults)
-      tbl.registerTempTable("currentResults")
+      tbl.createOrReplaceTempView("currentResults")
       tbl
     }
 
     /** Returns full iterations from an actively running experiment. */
-    def getCurrentRuns() = {
+    def getCurrentRuns(): DataFrame = {
       val tbl = sqlContext.createDataFrame(currentRuns)
-      tbl.registerTempTable("currentRuns")
+      tbl.createOrReplaceTempView("currentRuns")
       tbl
     }
 
-    def tail(n: Int = 20) = {
+    def tail(n: Int = 20): String = {
       currentMessages.takeRight(n).mkString("\n")
     }
 
-    def status =
+    def status: String = {
       if (resultsFuture.isCompleted) {
         if (resultsFuture.value.get.isFailure) "Failed" else "Successful"
       } else {
         "Running"
       }
+    }
 
-    override def toString =
+    override def toString: String =
       s"""Permalink: table("sqlPerformance").where('timestamp === ${timestamp}L)"""
 
 
     def html: String = {
+      // scalastyle:off
       val maybeQueryPlan: String =
         if (currentPlan.nonEmpty) {
           s"""
@@ -530,6 +534,7 @@ object Benchmark {
          |${tail()}
          |</pre>
          """.stripMargin
+      // scalastyle:on
     }
   }
 }
