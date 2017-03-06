@@ -27,7 +27,7 @@ spark-submit --master yarn-client --class com.databricks.spark.sql.perf.RunBench
 
 
 ## NOTE
-1. if you are not using S3 to store generated data, you do not need the last two parameters in step 6
+1. if you are not using S3 to store generated data, you do not need the last two parameters in step 5
 2. to use multiple machines to generate data, you have to do 3, 4 in every machine
 
 
