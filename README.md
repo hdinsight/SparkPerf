@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/CodingCat/spark-benchmark.svg?token=cgynzzx1RzaFxb12UpFW&branch=master)](https://travis-ci.com/CodingCat/spark-benchmark)
+
 # Modified Version Tutorial - CodingCat
 
 0.	Install necessary tools
