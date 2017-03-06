@@ -21,8 +21,8 @@ import java.util.UUID
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration._
 
-import com.databricks.spark.sql.perf.queries.Query
 import com.databricks.spark.sql.perf.report.{BenchmarkResult, ExecutionMode, Failure}
+import com.databricks.spark.sql.perf.sql.tpcds.Query
 import com.typesafe.scalalogging.slf4j.{LazyLogging => Logging}
 
 import org.apache.spark.sql.SQLContext

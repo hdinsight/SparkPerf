@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.databricks.spark.sql.perf.queries.tpcds
+package com.databricks.spark.sql.perf.sql.tpcds
 
 import scala.sys.process._
 
