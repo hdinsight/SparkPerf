@@ -1,9 +1,9 @@
 language: scala
-sudo: false
+scala:
+   - 2.11.8
+
 jdk:
-  oraclejdk8
-cache:
-  directories:
-    - $HOME/.ivy2
-env:
-  - DBC_USERNAME="" DBC_PASSWORD="" DBC_URL=""
+  - oraclejdk8
+
+script:
+  - ./run_tests.sh
