@@ -16,7 +16,6 @@
 
 package com.databricks.spark.sql.perf.sql.tpcds
 
-import com.databricks.spark.sql.perf.sql.Query
 import com.databricks.spark.sql.perf.report.ExecutionMode
 
 /**

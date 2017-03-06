@@ -25,7 +25,6 @@ import org.apache.spark.{SparkConf, SparkContext}
 import scala.util.Try
 
 import com.databricks.spark.sql.perf.sql.tpcds.{Benchmark, Tables}
-import com.databricks.spark.sql.perf.sql.Query
 import com.databricks.spark.sql.perf.report.ExecutionMode
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}

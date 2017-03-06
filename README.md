@@ -11,15 +11,19 @@ sudo apt-get update
 
 sudo apt-get install sbt
 
-1.	git clone https://github.com/CodingCat/spark-sql-perf.git
+1.	git clone https://github.com/CodingCat/spark-benchmark.git
 2.	Run the following command:
-cd spark-sql-perf; sbt assembly
+cd spark-benchmark; sbt assembly; cd ..
 3.	Git clone https://github.com/davies/tpcds-kit
-4.	Run the following command:
+4.	Run the following command: (Note: if you have to copy this directory to all worker nodes (script action failed for unknown reason))
 cd tpcds-kit/tools; mv Makefile.suite Makefile; make; cd -
 5.	Run the following command:
 cd spark-sql-perf; 
-spark-submit --class com.databricks.spark.sql.perf.runner.DataGenerator --executor-memory 4g target/scala-2.11/spark-sql-perf-assembly-0.4.11-SNAPSHOT.jar ~/tpcds-kit/tools size_of_data_in_GB location_of_generated_data blank_or_access_key blank_or_secret_key
+spark-submit --class com.databricks.spark.sql.perf.sql.tpcds.TPCDSDataGenerator --executor-memory 16g target/scala-2.11/spark-benchmark-assembly-0.4.11-SNAPSHOT.jar ~/tpcds-kit/tools size_of_data_in_GB location_of_generated_data blank_or_access_key blank_or_secret_key
+6.  Run benchmark
+
+spark-submit --master yarn-client --class com.databricks.spark.sql.perf.RunBenchmark --driver-memory 16g --executor-memory 16g --executor-cores 8 --num-executors 4  target/scala-2.11/spark-sql-perf-assembly-0.4.11-SNAPSHOT.jar --benchmark com.databricks.spark.sql.perf.queries.tpcds.ImpalaKitQueries --database db1 --path /tablebucket/ --executionMode parquet -i 10 --outputDir /outputresults/
+
 
 
 ## NOTE

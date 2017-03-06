@@ -18,8 +18,6 @@ package com.databricks.spark.sql.perf.sql.tpcds
 
 import scala.collection.mutable
 
-import com.databricks.spark.sql.perf._
-import com.databricks.spark.sql.perf.sql.Query
 import com.databricks.spark.sql.perf.report.ExecutionMode
 
 import org.apache.spark.SparkContext
