@@ -20,106 +20,55 @@ package com.microsoft.spark.perf.sql.tpcds
 
 import scala.collection.mutable
 
+import com.microsoft.spark.perf.ResourceParamGrid
+import com.microsoft.spark.perf.configurations.ResourceSpecification
 import com.microsoft.spark.perf.report.ExecutionMode
+import com.microsoft.spark.perf.report.ExecutionMode.WriteParquet
 import com.microsoft.spark.perf.sql.Query
 
-import org.apache.spark.SparkContext
-import org.apache.spark.sql.SQLContext
+import org.apache.spark.sql.SparkSession
 
 /**
  * TPC-DS benchmark's dataset.
- *
- * @param sqlContext An existing SQLContext.
  */
-class TPCDS(tableRootPath: String, executionMode: ExecutionMode = ExecutionMode.ForeachResults,
-            @transient sqlContext: SQLContext) extends TPCDSBenchmark(tableRootPath)
+class TPCDS(
+    tableRootPath: String,
+    executionMode: ExecutionMode = ExecutionMode.ForeachResults,
+    resourceSpecification: Option[ResourceSpecification])
+  extends TPCDSSQLBenchmark(tableRootPath, resourceSpecification)
   with Serializable {
 
-  val tpcdsQueries = new Tpcds_1_4_Queries(executionMode)
+  def this(tableRootPath: String, executionMode: ExecutionMode) =
+    this(tableRootPath, executionMode, None)
 
-  def this(tableRootPath: String, executionMode: ExecutionMode) = this(
-    tableRootPath, executionMode, SQLContext.getOrCreate(SparkContext.getOrCreate()))
+  val tpcdsQueries = new TPCDS14Queries(executionMode)
 
-  /*
-  def setupBroadcast(skipTables: Seq[String] = Seq("store_sales", "customer")) = {
-    val skipExpr = skipTables.map(t => !('tableName === t)).reduceLeft[Column](_ && _)
-    val threshold =
-      allStats
-        .where(skipExpr)
-        .select(max('sizeInBytes))
-        .first()
-        .getLong(0)
-    val setQuery = s"SET spark.sql.autoBroadcastJoinThreshold=$threshold"
-
-    println(setQuery)
-    sql(setQuery)
-  }
-  */
-
-  /**
-   * Simple utilities to run the queries without persisting the results.
-   */
-  def explain(queries: Seq[Query], showPlan: Boolean = false): Unit = {
-    val succeeded = mutable.ArrayBuffer.empty[String]
-    queries.foreach { q =>
-      println(s"Query: ${q.name}")
-      try {
-        val df = sqlContext.sql(q.sqlText.get)
-        if (showPlan) {
-          df.explain()
-        } else {
-          df.queryExecution.executedPlan
+  private lazy val queries = tpcdsQueries.tpcds1_4Queries.map { case (name, sqlText) =>
+    Query(sparkSession, name, sqlText, description = "TPCDS 1.4 Query",
+      executionMode = {
+        executionMode match {
+          case WriteParquet(location) =>
+            WriteParquet(location)
+          case exeMode => exeMode
         }
-        succeeded += q.name
-      } catch {
-        case e: Exception =>
-          println("Failed to plan: " + e)
-      }
-    }
-    println(s"Planned ${succeeded.size} out of ${queries.size}")
-    println(succeeded.map("\"" + _ + "\""))
+      })
   }
 
-  def run(queries: Seq[Query], numRows: Int = 1, timeout: Int = 0): Unit = {
-    val succeeded = mutable.ArrayBuffer.empty[String]
-    queries.foreach { q =>
-      println(s"Query: ${q.name}")
-      val start = System.currentTimeMillis()
-      val df = sqlContext.sql(q.sqlText.get)
-      var failed = false
-      val jobgroup = s"benchmark ${q.name}"
-      val t = new Thread("query runner") {
-        override def run(): Unit = {
-          try {
-            sqlContext.sparkContext.setJobGroup(jobgroup, jobgroup, true)
-            df.show(numRows)
-          } catch {
-            case e: Exception =>
-              println("Failed to run: " + e)
-              failed = true
-          }
-        }
-      }
-      t.setDaemon(true)
-      t.start()
-      t.join(timeout)
-      if (t.isAlive) {
-        println(s"Timeout after $timeout seconds")
-        sqlContext.sparkContext.cancelJobGroup(jobgroup)
-        t.interrupt()
-      } else {
-        if (!failed) {
-          succeeded += q.name
-          println(s"   Took: ${System.currentTimeMillis() - start} ms")
-          println("------------------------------------------------------------------")
-        }
-      }
-    }
-    println(s"Ran ${succeeded.size} out of ${queries.size}")
-    println(succeeded.map("\"" + _ + "\""))
-  }
+  private lazy val tpcds1_4QueriesMap = queries.map(q => q.name -> q).toMap
 
-  override lazy val allQueries: Seq[Query] = tpcdsQueries.runnable
+  private lazy val runnable: Seq[Query] = Seq(
+    "q1", "q2", "q3", "q4", "q5", "q7", "q8", "q9",
+    "q11", "q12", "q13", "q15", "q17", "q18", "q19",
+    "q20", "q21", "q22", "q25", "q26", "q27", "q28", "q29",
+    "q31", "q34", "q36", "q37", "q38", "q39a", "q39b",
+    "q40", "q42", "q43", "q44", "q46", "q47", "q48", "q49",
+    "q50", "q51", "q52", "q53", "q54", "q55", "q57", "q59",
+    "q61", "q62", "q63", "q64", "q65", "q66", "q67", "q68",
+    "q71", "q72", "q73", "q74", "q75", "q76", "q77", "q78", "q79",
+    "q80", "q82", "q84", "q85", "q86", "q87", "q88", "q89",
+    "q90", "q91", "q93", "q96", "q97", "q98", "q99", "qSsMax").map(tpcds1_4QueriesMap)
+
+  override lazy val allQueries: Seq[Query] = runnable
 }
 
 

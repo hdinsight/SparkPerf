@@ -16,11 +16,17 @@
  * limitations under the License.
  */
 
-package com.microsoft.spark.perf.report
+package com.microsoft.spark.perf.sql
 
-import org.apache.spark.sql.{DataFrame, SQLContext}
+import com.microsoft.spark.perf.configurations.ResourceSpecification
+import com.microsoft.spark.perf.report.BenchmarkConfiguration
 
-case class Results(resultsLocation: String, @transient sqlContext: SQLContext) {
-  def allResults: DataFrame =
-    sqlContext.read.json(sqlContext.sparkContext.textFile(s"$resultsLocation/*/"))
-}
+class SQLBenchmarkConfiguration(
+    sparkVersion: String = org.apache.spark.SPARK_VERSION,
+    sqlConf: Map[String, String],
+    sparkConf: Map[String, String],
+    defaultParallelism: Int,
+    buildInfo: Map[String, String],
+    resourceSpecification: Option[ResourceSpecification])
+  extends BenchmarkConfiguration(sparkVersion, sparkConf, defaultParallelism, buildInfo,
+    resourceSpecification)

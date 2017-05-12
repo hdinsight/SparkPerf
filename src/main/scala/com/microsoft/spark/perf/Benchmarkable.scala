@@ -22,17 +22,14 @@ import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration._
 
 import com.microsoft.spark.perf.report.{BenchmarkResult, ExecutionMode, Failure}
-import com.typesafe.scalalogging.slf4j.{LazyLogging => Logging}
 
 import org.apache.spark.{SparkContext, SparkEnv}
-import org.apache.spark.sql.SQLContext
 
 /** A trait to describe things that can be benchmarked. */
-trait Benchmarkable extends Logging {
-  @transient protected[this] val sqlContext = SQLContext.getOrCreate(SparkContext.getOrCreate())
-  @transient protected[this] val sparkContext = sqlContext.sparkContext
+abstract class Benchmarkable(@transient sparkContext: SparkContext) extends Serializable {
 
   val name: String
+
   protected val executionMode: ExecutionMode
 
   final def benchmark(
@@ -41,7 +38,6 @@ trait Benchmarkable extends Logging {
       messages: ArrayBuffer[String],
       timeout: Long,
       forkThread: Boolean = true): BenchmarkResult = {
-    logger.info(s"$this: benchmark")
     sparkContext.setJobDescription(s"Execution: $name, $description")
     beforeBenchmark()
     val result = if (forkThread) {
@@ -49,7 +45,7 @@ trait Benchmarkable extends Logging {
     } else {
       doBenchmark(includeBreakdown, description, messages)
     }
-    afterBenchmark(sqlContext.sparkContext)
+    afterBenchmark(sparkContext)
     result
   }
 
@@ -60,8 +56,8 @@ trait Benchmarkable extends Logging {
     System.gc()
     // Remove any leftover blocks that still exist
     sc.getExecutorStorageStatus
-        .flatMap { status => status.blocks.map { case (bid, _) => bid } }
-        .foreach { bid => SparkEnv.get.blockManager.master.removeBlock(bid) }
+      .flatMap { status => status.blocks.map { case (bid, _) => bid } }
+      .foreach { bid => SparkEnv.get.blockManager.master.removeBlock(bid) }
   }
 
   private def runBenchmarkForked(
@@ -74,13 +70,11 @@ trait Benchmarkable extends Logging {
     var result: BenchmarkResult = null
     val thread = new Thread("benchmark runner") {
       override def run(): Unit = {
-        logger.info(s"$that running $this")
-        sparkContext.setJobGroup(jobgroup, s"benchmark $name", true)
+        sparkContext.setJobGroup(jobgroup, s"benchmark $name", interruptOnCancel = true)
         try {
           result = doBenchmark(includeBreakdown, description, messages)
         } catch {
           case e: Throwable =>
-            logger.info(s"$that: failure in runBenchmark: $e")
             println(s"$that: failure in runBenchmark: $e")
             result = BenchmarkResult(
               name = name,

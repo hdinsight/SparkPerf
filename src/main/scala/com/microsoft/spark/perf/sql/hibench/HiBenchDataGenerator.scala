@@ -48,15 +48,15 @@ object HiBenchDataGenerator {
     for (i <- lowBound until upperBound) {
       val linkIds = generator.genPureLinkIds()
       for (j <- 0 until linkIds.length) {
-        val uId = linkIds(j)
-        val currentInLinks = hashMap.getOrElseUpdate(uId, 0) + 1
-        hashMap += uId -> currentInLinks
+        val urlId = linkIds(j)
+        val currentInLinks = hashMap.getOrElseUpdate(urlId, 0) + 1
+        hashMap += urlId -> currentInLinks
       }
     }
     hashMap.iterator
   }
 
-  private def generateRankingRDD(
+  private[hibench] def generateRankingRDD(
       conf: SparkConf,
       sparkSession: SparkSession,
       urlRDD: RDD[(Long, String)]): RDD[(String, Long)] = {
@@ -73,43 +73,63 @@ object HiBenchDataGenerator {
     urlRDD.join(inLinksRDD).map(_._2)
   }
 
-  private def outputRankingFiles(
+  private[hibench] def outputRankingFiles(
       conf: SparkConf,
       sparkSession: SparkSession,
       rankingRDD: RDD[(String, Long)]): Unit = {
     import sparkSession.implicits._
     val rankingDF = rankingRDD.toDF("url", "rankings")
-    rankingDF.write.mode(SaveMode.Overwrite).parquet(conf.get("outputPath") + "/ranking")
+    rankingDF.write.mode(SaveMode.Overwrite).parquet(conf.get("outputPath") + "/rankings")
   }
 
 
-  private def generateUserVisits(
+  private[hibench] def generateUserVisits(
       conf: SparkConf,
       sparkSession: SparkSession,
       rankingRDD: RDD[(String, Long)]): RDD[UserVisitRecord] = {
     rankingRDD.repartition(conf.getInt("numPartitionsVisits", 100)).mapPartitions {
       urlAndInLinks =>
-        val userVisitsGenerator = new Visit(",")
-        userVisitsGenerator.fireRandom(System.currentTimeMillis().toInt)
-        urlAndInLinks.flatMap {
-          case (url, inLinks) =>
-            val urlVisitPairs = new ListBuffer[UserVisitRecord]
-            // TODO: avoid this long -> int conversion
-            for (i <- 0 until inLinks.toInt) {
-              urlVisitPairs += userVisitsGenerator.nextAccess(url)
-            }
-            urlVisitPairs
+        if (urlAndInLinks.isEmpty) {
+          new ListBuffer[UserVisitRecord].iterator
+        } else {
+          val userVisitsGenerator = new Visit(",")
+          userVisitsGenerator.fireRandom(System.currentTimeMillis().toInt)
+          urlAndInLinks.flatMap {
+            case (url, inLinks) =>
+              val urlVisitPairs = new ListBuffer[UserVisitRecord]
+              // TODO: avoid this long -> int conversion
+              for (i <- 0 until inLinks.toInt) {
+                urlVisitPairs += userVisitsGenerator.nextAccess(url)
+              }
+              urlVisitPairs
+          }
         }
     }
   }
 
-  private def outputUsersVisitsFiles(
+  private[hibench] def outputUsersVisitsFiles(
       conf: SparkConf,
       sparkSession: SparkSession,
       userVisitsRDD: RDD[UserVisitRecord]): Unit = {
     import sparkSession.implicits._
     userVisitsRDD.toDF.write.mode(SaveMode.Overwrite).parquet(conf.get("outputPath") +
       "/uservisits")
+  }
+
+  private[hibench] def generateUrlRDD(
+      sparkConf: SparkConf,
+      sparkSession: SparkSession,
+      numPartitionsRanking: Int) = {
+    // generate random URLs
+    sparkSession.sparkContext.parallelize(0 until numPartitionsRanking,
+      numPartitionsRanking).mapPartitions { _ =>
+      val htmlGenerator = new HtmlCore(sparkConf)
+      htmlGenerator.fireRandom(System.currentTimeMillis().toInt)
+      val Array(lowBound, upBound) = HtmlCore.getPageRange(TaskContext.getPartitionId(),
+        sparkConf.getInt("pages", 0), sparkConf.getInt("slotpages", 0))
+      val keyToURLItr = generateKeyToURL(lowBound, upBound, htmlGenerator)
+      keyToURLItr
+    }
   }
 
   def main(args: Array[String]): Unit = {
@@ -126,16 +146,8 @@ object HiBenchDataGenerator {
 
     val sparkSession = SparkSession.builder().getOrCreate()
 
-    // generate random URLs
-    val urlRDD = sparkSession.sparkContext.parallelize(0 until numPartitionsRanking,
-      numPartitionsRanking).mapPartitions { _ =>
-        val htmlGenerator = new HtmlCore(conf)
-        htmlGenerator.fireRandom(System.currentTimeMillis().toInt)
-        val Array(lowBound, upBound) = HtmlCore.getPageRange(TaskContext.getPartitionId(),
-          conf.getInt("pages", 0), conf.getInt("slotpages", 0))
-        val keyToURLItr = generateKeyToURL(lowBound, upBound, htmlGenerator)
-        keyToURLItr
-    }
+
+    val urlRDD = generateUrlRDD(conf, sparkSession, numPartitionsRanking)
 
     // ranking data
     val urlRankingsRDD = generateRankingRDD(conf, sparkSession, urlRDD).cache()

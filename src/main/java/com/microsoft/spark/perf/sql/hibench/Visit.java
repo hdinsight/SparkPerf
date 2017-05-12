@@ -66,7 +66,7 @@ public class Visit {
   private void initSearchKeys() throws ClassNotFoundException, IOException {
     int len = 99171;
     skeys = new String[len];
-    InputStream newis = Class.forName("com.databricks.spark.sql.perf.sql.hibench.Visit").
+    InputStream newis = Class.forName(this.getClass().getName()).
             getResourceAsStream("/words");
     InputStreamReader isr = new InputStreamReader(newis);
     BufferedReader br = new BufferedReader(isr);

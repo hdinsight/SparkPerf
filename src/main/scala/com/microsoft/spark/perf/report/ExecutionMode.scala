@@ -29,6 +29,10 @@ case object ExecutionMode {
     override def toString: String = "collect"
   }
 
+  case class WriteTextFile(outputPath: String) extends ExecutionMode {
+    override def toString: String = s"outputTextFile($outputPath)"
+  }
+
   /** Benchmark run by iterating through the queries results rows (e.g. rdd.foreach(row => Unit)) */
   case object ForeachResults extends ExecutionMode {
     override def toString: String = "foreach"
@@ -36,7 +40,7 @@ case object ExecutionMode {
 
   /** Benchmark run by saving the output of each query as a parquet file. */
   case class WriteParquet(location: String) extends ExecutionMode {
-    override def toString: String = "saveToParquet"
+    override def toString: String = s"saveToParquet($location)"
   }
 
   /**

@@ -16,9 +16,17 @@
 
 package com.microsoft.spark.perf.sql.tpcds
 
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{SparkSession, SQLContext}
 
 object TPCDSDataGenerator {
+
+  private[tpcds] def dataGen(
+      sqlContext: SQLContext, dsdgenPath: String, tableLocation: String, scaleFactor: Int): Unit = {
+    val tables = new Tables(sqlContext, dsdgenPath, scaleFactor)
+    tables.genData(tableLocation, "parquet",
+      overwrite = true, partitionTables = true, useDoubleForDecimal = false,
+      clusterByPartitionColumns = true, filterOutNullPartitionValues = true)
+  }
 
   def main(args: Array[String]): Unit = {
     val dsdgenPath = args(0)
@@ -41,16 +49,9 @@ object TPCDSDataGenerator {
       sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.secret.key",
         args(5))
     }
-    val tables = new Tables(sparkSession.sqlContext, dsdgenPath, scaleFactor)
 
     if (genData) {
-      tables.genData(tableLocation, "parquet",
-        overwrite = true, partitionTables = true, useDoubleForDecimal = false,
-        clusterByPartitionColumns = true, filterOutNullPartitionValues = true)
+      dataGen(sparkSession.sqlContext, dsdgenPath, tableLocation, scaleFactor)
     }
-
-    // Create metastore tables in a specified database for your data.
-    // Once tables are created, the current database will be switched to the specified database.
-    tables.createExternalTables(tableLocation, "parquet", "db1", overwrite = true)
   }
 }

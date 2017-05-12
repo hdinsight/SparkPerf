@@ -23,7 +23,7 @@ import scala.sys.process._
 import org.slf4j.LoggerFactory
 
 import org.apache.spark.SparkContext
-import org.apache.spark.sql.{Row, SaveMode, SQLContext}
+import org.apache.spark.sql.{DataFrame, Row, SaveMode, SQLContext}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
@@ -47,7 +47,7 @@ class Tables(sqlContext: SQLContext, dsdgenDir: String, scaleFactor: Int) extend
      *  If convertToSchema is true, the data from generator will be parsed into columns and
      *  converted to `schema`. Otherwise, it just outputs the raw data (as a single STRING column).
      */
-    private def df(convertToSchema: Boolean, numPartition: Int) = {
+    private def df(convertToSchema: Boolean, numPartition: Int): DataFrame = {
       val partitions = if (partitionColumns.isEmpty) 1 else numPartition
       val generatedData = {
         sparkContext.parallelize(1 to partitions, partitions).flatMap { i =>
@@ -66,7 +66,6 @@ class Tables(sqlContext: SQLContext, dsdgenDir: String, scaleFactor: Int) extend
             "bash", "-c",
             s"cd $localToolsDir && ./dsdgen -table $name -filter Y -scale $scaleFactor" +
               s" -RNGSEED 100 $parallel")
-          println(commands)
           commands.lines
         }
       }

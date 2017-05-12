@@ -23,22 +23,25 @@ import scala.collection.mutable.ArrayBuffer
 import scala.language.implicitConversions
 
 import com.microsoft.spark.perf.Benchmarkable
-import com.microsoft.spark.perf.report.{BenchmarkResult, BreakdownResult, ExecutionMode, Failure}
+import com.microsoft.spark.perf.report.{BenchmarkResult, ExecutionMode, Failure}
+import com.microsoft.spark.perf.sql.report.{SQLBenchmarkResult, SQLBreakdownResult}
 
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.apache.spark.sql.catalyst.analysis.UnresolvedRelation
 import org.apache.spark.sql.execution.SparkPlan
 
 /** Holds one benchmark query and its metadata. */
-class Query(
+private[sql] class Query(
+    @transient sparkSession: SparkSession,
     override val name: String,
-    buildDataFrame: => DataFrame,
     val description: String = "",
     val sqlText: Option[String] = None,
     override val executionMode: ExecutionMode = ExecutionMode.ForeachResults)
-  extends Benchmarkable with Serializable {
+  extends Benchmarkable(sparkSession.sparkContext) with Serializable {
 
   private implicit def toOption[A](a: A): Option[A] = Option(a)
+
+  private def buildDataFrame = sparkSession.sql(sqlText.get)
 
   override def toString: String = {
     try {
@@ -107,7 +110,7 @@ class Query(
 
             messages += s"Breakdown time: $executionTime (+${executionTime - childTime})"
 
-            BreakdownResult(
+            SQLBreakdownResult(
               node.nodeName,
               node.simpleString.replaceAll("#\\d+", ""),
               index,
@@ -116,10 +119,8 @@ class Query(
               executionTime - childTime)
         }
       } else {
-        Seq.empty[BreakdownResult]
+        Seq.empty[SQLBreakdownResult]
       }
-
-      println(s"==============$executionMode================")
 
       // The executionTime for the entire query includes the time of type conversion from catalyst
       // to scala.
@@ -129,8 +130,7 @@ class Query(
           case ExecutionMode.CollectResults => dataFrame.rdd.collect()
           case ExecutionMode.ForeachResults => dataFrame.rdd.foreach { row => Unit }
           case ExecutionMode.WriteParquet(location) =>
-            println(s"===============writing to $location/$name==============")
-            dataFrame.write.format("parquet").mode(SaveMode.Overwrite).save(s"$location/$name")
+            dataFrame.write.format("parquet").mode(SaveMode.Overwrite).save(s"$location/")
           case ExecutionMode.HashResults =>
             // SELECT SUM(CRC32(CONCAT_WS(", ", *))) FROM (benchmark query)
             val row =
@@ -145,7 +145,7 @@ class Query(
         case k if k.nodeName contains "Join" => k.nodeName
       }
 
-      BenchmarkResult(
+      new SQLBenchmarkResult(
         name = name,
         mode = executionMode.toString,
         joinTypes = joinTypes,
@@ -160,38 +160,24 @@ class Query(
         breakDown = breakdownResults)
     } catch {
       case e: Exception =>
-         BenchmarkResult(
-           name = name,
-           mode = executionMode.toString,
-           failure = Failure(e.getClass.getName, e.getMessage))
+        e.printStackTrace()
+        BenchmarkResult(
+          name = name,
+          mode = executionMode.toString,
+          failure = Failure(e.getClass.getName, e.getMessage))
     }
-  }
-
-  /**
-   *  Change the ExecutionMode of this Query to HashResults, which is used to check the
-   *  query result.
-   */
-  def checkResult: Query = {
-    new Query(name, buildDataFrame, description, sqlText, ExecutionMode.HashResults)
   }
 }
 
 object Query {
 
-  lazy private val sqlContext = SparkSession.builder().getOrCreate()
-
   def apply(
+      sparkSession: SparkSession,
       name: String,
       sqlText: String,
       description: String,
       executionMode: ExecutionMode = ExecutionMode.ForeachResults): Query = {
-    new Query(name, sqlContext.sql(sqlText), description, Some(sqlText), executionMode)
-  }
-
-  def apply(
-             name: String,
-             dataFrameBuilder: => DataFrame,
-             description: String): Query = {
-    new Query(name, dataFrameBuilder, description, None, ExecutionMode.CollectResults)
+    new Query(sparkSession, name, description, Some(sqlText), executionMode)
   }
 }
+

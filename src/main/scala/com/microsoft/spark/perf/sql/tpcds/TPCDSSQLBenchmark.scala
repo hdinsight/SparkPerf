@@ -16,16 +16,16 @@
 
 package com.microsoft.spark.perf.sql.tpcds
 
-import com.microsoft.spark.perf.sql.Benchmark
+import com.microsoft.spark.perf.configurations.ResourceSpecification
+import com.microsoft.spark.perf.sql.SQLBenchmark
 
-import org.apache.spark.sql.SparkSession
+class TPCDSSQLBenchmark(
+    tableRootPath: String,
+    resourceSpecification: Option[ResourceSpecification])
+  extends SQLBenchmark(resourceSpecification) {
 
-class TPCDSBenchmark(tableRootPath: String) extends Benchmark(tableRootPath) {
-
-  override protected def buildTables(): Unit = {
-    val sparkSession = SparkSession.builder().getOrCreate()
-    val sqlContext = SparkSession.builder().getOrCreate().sqlContext
-    val dummyTablesObj = new Tables(sqlContext, "", 1)
+  override private[perf] def buildTables(): Unit = {
+    val dummyTablesObj = new Tables(sparkSession.sqlContext, "", 1)
     dummyTablesObj.tables.foreach(table => {
       val df = sparkSession.read.parquet(s"$tableRootPath/${table.name}")
       df.createOrReplaceTempView(s"${table.name}")
