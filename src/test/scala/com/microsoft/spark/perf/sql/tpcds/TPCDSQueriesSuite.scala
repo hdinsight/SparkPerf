@@ -49,7 +49,7 @@ class TPCDSQueriesSuite extends FunSuite with BeforeAndAfterAll {
     val p = pb.start()
     p.waitFor()
     TPCDSDataGenerator.dataGen(sparkSession.sqlContext, tpcdsKitPath + "/tools",
-      tpcdsTablePath, 1)
+      tpcdsTablePath, 1, numPartitions = 100)
     System.setProperty("spark.master", "local[*]")
     System.setProperty("spark.app.name", "test")
     sparkSession.stop()
