@@ -21,11 +21,13 @@ import org.apache.spark.sql.{SparkSession, SQLContext}
 object TPCDSDataGenerator {
 
   private[tpcds] def dataGen(
-      sqlContext: SQLContext, dsdgenPath: String, tableLocation: String, scaleFactor: Int): Unit = {
+      sqlContext: SQLContext, dsdgenPath: String, tableLocation: String,
+      scaleFactor: Int, numPartitions: Int): Unit = {
     val tables = new Tables(sqlContext, dsdgenPath, scaleFactor)
     tables.genData(tableLocation, "parquet",
       overwrite = true, partitionTables = true, useDoubleForDecimal = false,
-      clusterByPartitionColumns = true, filterOutNullPartitionValues = true)
+      clusterByPartitionColumns = true, filterOutNullPartitionValues = true,
+      numPartitions = numPartitions)
   }
 
   def main(args: Array[String]): Unit = {
@@ -33,6 +35,7 @@ object TPCDSDataGenerator {
     val scaleFactor = args(1).toInt
     val tableLocation = args(2)
     val genData = args(3).toBoolean
+    val numPartitions = args(4).toInt
 
     val sparkSession = SparkSession
       .builder()
@@ -41,17 +44,8 @@ object TPCDSDataGenerator {
       // .enableHiveSupport()
       .getOrCreate()
 
-    if (args.length > 4) {
-      sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.impl",
-        "org.apache.hadoop.fs.s3a.S3AFileSystem")
-      sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.access.key",
-        args(4))
-      sparkSession.sparkContext.hadoopConfiguration.set("fs.s3a.secret.key",
-        args(5))
-    }
-
     if (genData) {
-      dataGen(sparkSession.sqlContext, dsdgenPath, tableLocation, scaleFactor)
+      dataGen(sparkSession.sqlContext, dsdgenPath, tableLocation, scaleFactor, numPartitions)
     }
   }
 }
