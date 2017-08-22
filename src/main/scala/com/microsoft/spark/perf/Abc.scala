@@ -18,7 +18,7 @@ package com.microsoft.spark.perf
 
 import org.apache.spark.SparkContext
 
-object abc {
+class abc {
   def main(args: Array[String]): Unit = {
     val sc = new SparkContext()
     sc.parallelize(List(1, 2, 3)).count()
