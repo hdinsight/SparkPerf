@@ -25,21 +25,15 @@ object TeraSortDataGenerator {
     println(s"Total size: $sizeStr")
     println(s"Partition count: $inputPartitions")
     println(s"Output path: $outputPath")
-    val datageneration = measureTimeMs {
+
+    val (timeCost, _) = measureTimeMs {
       val dataset = TeraSortRecordGenerator.generateInputRecords(
         sparkSession.sparkContext,
         sizeStr,
         inputPartitions)
-      dataset
-    }
-    val datasave = measureTimeMs {
-      datageneration._2.map(result => result._1).saveAsObjectFile(outputPath)
+      dataset.map(_._1).saveAsObjectFile(outputPath)
     }
 
-    val datagentimems = datageneration._1
-    val datasavetimems = datasave._1
-
-    println(s"Data Generation Time ms: $datagentimems")
-    println(s"Data Save Time ms: $datasavetimems")
+    println(s"Data Generation Time: $timeCost ms")
   }
 }
